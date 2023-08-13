@@ -149,3 +149,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+confi*.json
+nextb_binance_session.session
+nextb_binance_session.session-journal

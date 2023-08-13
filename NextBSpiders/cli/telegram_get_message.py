@@ -11,9 +11,13 @@ __doc__ = """
 获取telegram的消息
 """
 
-import json
 import argparse
 import datetime
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
@@ -90,7 +94,9 @@ def telegram_get_message(config_file):
         nick_name = data.get("nick_name", "")
         user_name = data.get("user_name", "")
         user_id = data.get("user_id", "")
-        postal_time = data.get("postal_time", datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S+%Z")
+        postal_time = data.get("postal_time", datetime.datetime.now()).strftime(
+            "%Y-%m-%d %H:%M:%S+%Z"
+        )
         message = data.get("message", "")
         print(
             "{},{},{},{},{},{}".format(
@@ -106,3 +112,7 @@ def run():
     """
     args = parse_cmd()
     telegram_get_message(args.config)
+
+
+if __name__ == "__main__":
+    run()

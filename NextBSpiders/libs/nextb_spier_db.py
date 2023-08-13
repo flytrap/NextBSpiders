@@ -8,8 +8,10 @@
 
 
 from sqlalchemy import create_engine, distinct
-from sqlalchemy.orm import sessionmaker, scoped_session
-from NextBSpiders.items import TelegramMessage, Base
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from NextBSpiders.configs.postgreconfig import db_config
+from NextBSpiders.items import Base, TelegramMessage
 
 
 class NextBTGSQLITEDB:
@@ -68,15 +70,15 @@ class NextBTGSQLITEDB:
         else:
             return None
 
-    def get_last_one_message(self):
+    def get_last_one_message(self, chat_id=None):
         """
         获取最近一条消息
         """
-        data = (
-            self.session_maker.query(TelegramMessage)
-            .order_by(TelegramMessage.id.desc())
-            .limit(1)
-        )
+        q = self.session_maker.query(TelegramMessage)
+        if chat_id:
+            q = q.filter(TelegramMessage.chat_id == chat_id)
+
+        data = q.order_by(TelegramMessage.id.desc()).limit(1)
         if data.count():
             return data[0]
         else:
@@ -116,3 +118,25 @@ class NextBTGSQLITEDB:
         """
         data = self.session_maker.query(TelegramMessage.id)
         return data.count()
+
+
+class NextBTGPOSTGRESDB(NextBTGSQLITEDB):
+    def __init__(self):
+        """
+        初始化对象
+        """
+        self.engine = self.init_db_connection()
+        self.session_maker = None
+        self.create_session()
+
+    @staticmethod
+    def init_db_connection():
+        """
+        链接数据库
+        """
+        template_conn_str = (
+            "postgresql+psycopg2://{username}:{password}@{address}:{port}/{db_name}"
+        )
+        conn_str = template_conn_str.format(**db_config)
+        engine = create_engine(conn_str)
+        return engine

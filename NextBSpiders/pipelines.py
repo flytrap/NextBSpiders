@@ -6,11 +6,13 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import json
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
 
-from NextBSpiders.items import TelegramMessage
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.sql import exists
+
 from NextBSpiders.configs.postgreconfig import db_config
+from NextBSpiders.items import TelegramMessage
 
 """
 后续需要将所有的输出结果统一到一个pipeline里，根据爬虫选择输出方式
@@ -37,9 +39,19 @@ class AppspiderPostgreslPipeline(object):
     def process_item(self, item, spider):
         if len(self.datas) >= self.push_number:
             for data in self.datas:
+                message_id = data.get("message_id", -1)
+                chat_id = data.get("chat_id", -1)
+                is_exist = self.session_maker.query(
+                    exists().where(
+                        TelegramMessage.message_id == message_id,
+                        TelegramMessage.chat_id == chat_id,
+                    )
+                ).scalar()
+                if is_exist:
+                    continue
                 new_message = TelegramMessage()
-                new_message.message_id = data.get("message_id", -1)
-                new_message.chat_id = data.get("chat_id", -1)
+                new_message.message_id = message_id
+                new_message.chat_id = chat_id
                 new_message.user_id = data.get("user_id", -1)
                 new_message.user_name = data.get("user_name", "")
                 new_message.nick_name = data.get("nick_name", "")
@@ -48,6 +60,7 @@ class AppspiderPostgreslPipeline(object):
                 new_message.from_name = data.get("from_name", "")
                 new_message.from_time = data.get("from_time")
                 new_message.message = data.get("message", "")
+                new_message.text = data.get("text", "")
                 self.session_maker.add(new_message)
             self.session_maker.commit()
             self.datas = []
@@ -59,9 +72,19 @@ class AppspiderPostgreslPipeline(object):
     def close_spider(self, spider):
         if len(self.datas) > 0:
             for data in self.datas:
+                message_id = data.get("message_id", -1)
+                chat_id = data.get("chat_id", -1)
+                is_exist = self.session_maker.query(
+                    exists().where(
+                        TelegramMessage.message_id == message_id,
+                        TelegramMessage.chat_id == chat_id,
+                    )
+                ).scalar()
+                if is_exist:
+                    continue
                 new_message = TelegramMessage()
-                new_message.message_id = data.get("message_id", -1)
-                new_message.chat_id = data.get("chat_id", -1)
+                new_message.message_id = message_id
+                new_message.chat_id = chat_id
                 new_message.user_id = data.get("user_id", -1)
                 new_message.user_name = data.get("user_name", "")
                 new_message.nick_name = data.get("nick_name", "")
@@ -70,6 +93,7 @@ class AppspiderPostgreslPipeline(object):
                 new_message.from_name = data.get("from_name", "")
                 new_message.from_time = data.get("from_time")
                 new_message.message = data.get("message", "")
+                new_message.text = data.get("text", "")
                 self.session_maker.add(new_message)
             self.session_maker.commit()
             self.datas = []
@@ -126,6 +150,7 @@ class AppspiderSqlitePipeline(object):
                 new_message.from_name = data.get("from_name", "")
                 new_message.from_time = data.get("from_time")
                 new_message.message = data.get("message", "")
+                new_message.text = data.get("text", "")
                 self.session_maker.add(new_message)
             self.session_maker.commit()
             self.datas = []
@@ -148,7 +173,21 @@ class AppspiderSqlitePipeline(object):
                 new_message.from_name = data.get("from_name", "")
                 new_message.from_time = data.get("from_time")
                 new_message.message = data.get("message", "")
+                new_message.text = data.get("text", "")
                 self.session_maker.add(new_message)
             self.session_maker.commit()
             self.datas = []
         self.session_maker.close_all()
+
+
+class AppspiderMongoPipeline(object):
+    def open_spider(self, spider):
+        self.file = open(spider.name + ".txt", "a")
+
+    def close_spider(self, spider):
+        self.file.close()
+
+    def process_item(self, item, spider):
+        line = json.dumps(dict(item)) + "\n"
+        self.file.write(line)
+        return item

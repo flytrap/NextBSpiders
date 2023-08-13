@@ -249,7 +249,7 @@ class TelegramAPIs(object):
         """
         tick = 0
         waterline = randint(5, 20)
-        limit = kwargs["limit"]
+        limit = kwargs.get("limit")
         min_id = kwargs["last_message_id"]
         # 默认只能从最远开始爬取
         offset_date = None
@@ -266,7 +266,6 @@ class TelegramAPIs(object):
             wait_time=1,
             reverse=True,
         ):
-
             if isinstance(message, Message):
                 content = ""
                 try:
@@ -277,6 +276,7 @@ class TelegramAPIs(object):
                     continue
                 m = dict()
                 m["message_id"] = message.id
+                m["text"] = message.text
                 m["user_id"] = 0
                 m["user_name"] = ""
                 m["nick_name"] = ""
@@ -311,11 +311,11 @@ class TelegramAPIs(object):
                 # m['postal_time'] = message.date.strftime('%Y-%m-%d %H:%M:%S')
                 m["postal_time"] = message.date
                 m["message"] = content
-                tick += 1
-                if tick >= waterline:
-                    tick = 0
-                    waterline = randint(5, 10)
-                    time.sleep(waterline)
+                # tick += 1
+                # if tick >= waterline:
+                #     tick = 0
+                #     waterline = randint(5, 10)
+                #     time.sleep(waterline)
                 count += 1
                 yield m
         print("total: %d" % count)
@@ -333,7 +333,9 @@ class TelegramAPIs(object):
             try:
                 from PIL import Image
             except Exception as e:
-                print("检测到未安装PIL库，无法对头像进行缩放处理，保存原始头像。若要保存缩放后的头像，请安装PIL，安装命令：pip install Pillow")
+                print(
+                    "检测到未安装PIL库，无法对头像进行缩放处理，保存原始头像。若要保存缩放后的头像，请安装PIL，安装命令：pip install Pillow"
+                )
                 use_pil_image = False
         chat = self.get_dialog(chat_id, is_more=True)
         for nick_name in nick_names:

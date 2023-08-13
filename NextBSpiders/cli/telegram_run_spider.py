@@ -11,13 +11,17 @@ __doc__ = """
 NextBSpider执行telegram爬虫命令行工具
 """
 
-import os
-import json
-import base64
 import argparse
+import base64
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("."))
+
 # from scrapy import cmdline
 from NextBSpiders import NEXTBSPIDER_VERSION
-from NextBSpiders.libs.nextb_spier_db import NextBTGSQLITEDB
+from NextBSpiders.libs.nextb_spier_db import NextBTGPOSTGRESDB, NextBTGSQLITEDB
 
 scrapy_cfg = """# Automatically created by: scrapy startproject
 #
@@ -28,6 +32,7 @@ scrapy_cfg = """# Automatically created by: scrapy startproject
 default = NextBSpiders.settings
 """
 
+
 def process_scrapy_cfg_file():
     current_dir = os.path.abspath(".")
     scrapy_file = os.path.join(current_dir, "scrapy.cfg")
@@ -35,6 +40,7 @@ def process_scrapy_cfg_file():
         with open(scrapy_file, "w") as f:
             f.write(scrapy_cfg)
             f.flush()
+
 
 def parse_cmd():
     """
@@ -66,9 +72,12 @@ def telegram_run_spider(config_file):
         data = f.read()
     config_js = json.loads(data)
     # 初始化数据库
-    nb = NextBTGSQLITEDB(config_js.get("sqlite_db_name", "sqlite.db"))
+    if config_js.get("db_type") == "postgres":
+        nb = NextBTGPOSTGRESDB()
+    else:
+        nb = NextBTGSQLITEDB(config_js.get("sqlite_db_name", "sqlite.db"))
     # 获取指定群组的最近一条telegram消息的
-    message_data = nb.get_last_one_message()
+    message_data = nb.get_last_one_message(config_js.get("group", {}).get("group_id"))
     # 如果从数据库查询到消息，则更新配置参数
     if message_data:
         config_js["group"]["last_message_id"] = message_data.message_id
@@ -92,3 +101,7 @@ def run():
     process_scrapy_cfg_file()
     for config in args.configs:
         telegram_run_spider(config)
+
+
+if __name__ == "__main__":
+    run()

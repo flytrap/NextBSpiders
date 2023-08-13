@@ -7,9 +7,9 @@
 # @WeChat   : NextB
 
 db_config = {
-    'address': '',
-    'port': 0,
-    'username': '',
-    'password': '',
-    'db_name': ''
+    "address": "192.168.0.102",
+    "port": 5432,
+    "username": "postgres",
+    "password": "123456",
+    "db_name": "tg_search",
 }

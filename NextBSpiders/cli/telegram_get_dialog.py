@@ -11,8 +11,12 @@ __doc__ = """
 获取telegram的消息框
 """
 
-import json
 import argparse
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
@@ -110,3 +114,7 @@ def run():
     """
     args = parse_cmd()
     telegram_get_dialog(args.config)
+
+
+if __name__ == "__main__":
+    run()

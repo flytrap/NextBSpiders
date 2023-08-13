@@ -66,9 +66,9 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'NextBSpiders.pipelines.AppspiderPostgreslPipeline': 300,
+    "NextBSpiders.pipelines.AppspiderPostgreslPipeline": 300,
     # 'NextBSpiders.pipelines.AppspiderTxtPipeline': 300,
-    "NextBSpiders.pipelines.AppspiderSqlitePipeline": 300,
+    # "NextBSpiders.pipelines.AppspiderSqlitePipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

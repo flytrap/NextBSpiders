@@ -70,7 +70,7 @@ class TelegramScanMessages(scrapy.Spider, ABC):
             # 开始爬取
             last_message_id = self.group["last_message_id"]
             group_telegram_id = self.group["group_id"]
-            limit = self.group["limit"]
+            limit = self.group.get("limit")
             offset_date = self.group["offset_date"]
             offset_date = offset_date if offset_date else None
             chat = telegram_app.get_dialog(group_telegram_id, is_more=False)

@@ -11,10 +11,14 @@ __doc__ = """
 创建telegram消息表
 """
 
-import json
 import argparse
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders import NEXTBSPIDER_VERSION
-from NextBSpiders.libs.nextb_spier_db import NextBTGSQLITEDB
+from NextBSpiders.libs.nextb_spier_db import NextBTGPOSTGRESDB, NextBTGSQLITEDB
 
 
 def parse_cmd():
@@ -46,7 +50,10 @@ def telegram_create_table(config_file):
     with open(config_file, "r") as f:
         data = f.read()
     config_js = json.loads(data)
-    nb = NextBTGSQLITEDB(db_name=config_js.get("sqlite_db_name", "tg_sqlite.db"))
+    if config_js.get("db_type") == "postgres":
+        nb = NextBTGPOSTGRESDB()
+    else:
+        nb = NextBTGSQLITEDB(db_name=config_js.get("sqlite_db_name", "tg_sqlite.db"))
     nb.create_table()
 
 
@@ -56,3 +63,7 @@ def run():
     """
     args = parse_cmd()
     telegram_create_table(args.config)
+
+
+if __name__ == "__main__":
+    run()

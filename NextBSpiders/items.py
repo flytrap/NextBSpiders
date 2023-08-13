@@ -18,9 +18,9 @@ class TelegramMessage(Base):
     __tablename__ = "nextb_telegram_messages"
 
     # postgresql
-    # id = Column(BIGINT(), primary_key=True, unique=True, autoincrement=True)
+    id = Column(BIGINT(), primary_key=True, unique=True, autoincrement=True)
     # sqlite
-    id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
+    # id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True)
     message_id = Column(BIGINT())
     chat_id = Column(BIGINT())
     user_id = Column(BIGINT())
@@ -31,3 +31,4 @@ class TelegramMessage(Base):
     from_name = Column(String(255))
     from_time = Column(DateTime)
     message = Column(String(5096))
+    text = Column(String(5096))
