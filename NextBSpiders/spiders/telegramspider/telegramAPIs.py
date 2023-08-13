@@ -311,11 +311,11 @@ class TelegramAPIs(object):
                 # m['postal_time'] = message.date.strftime('%Y-%m-%d %H:%M:%S')
                 m["postal_time"] = message.date
                 m["message"] = content
-                # tick += 1
-                # if tick >= waterline:
-                #     tick = 0
-                #     waterline = randint(5, 10)
-                #     time.sleep(waterline)
+                tick += 1
+                if tick >= waterline:
+                    tick = 0
+                    waterline = randint(5, 10)
+                    time.sleep(waterline)
                 count += 1
                 yield m
         print("total: %d" % count)
