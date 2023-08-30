@@ -84,24 +84,26 @@ class NextBTGSQLITEDB:
         else:
             return None
 
-    def get_messages(self, begin_offset_date, end_oofset_date):
+    def get_messages(self, begin_offset_date=None, end_oofset_date=None):
         """
         获取消息，用于统计用户每天的发言数目
         begin_offset_date: 查询时间的起始偏移，默认查询最早的时间
         end_offset_date: 查询时间的结束偏移，默认查询当前的时间
         """
-        datas = (
-            self.session_maker.query(
-                TelegramMessage.user_id,
-                TelegramMessage.nick_name,
-                TelegramMessage.postal_time,
-            )
-            .filter(
+        q = self.session_maker.query(
+            TelegramMessage.user_id,
+            TelegramMessage.nick_name,
+            TelegramMessage.postal_time,
+            TelegramMessage.chat_id,
+            TelegramMessage.text,
+        )
+        if begin_offset_date and end_oofset_date:
+            datas = q.filter(
                 TelegramMessage.postal_time >= begin_offset_date,
                 TelegramMessage.postal_time < end_oofset_date,
-            )
-            .all()
-        )
+            ).all()
+        else:
+            datas = q.all()
         for data in datas:
             yield data
 

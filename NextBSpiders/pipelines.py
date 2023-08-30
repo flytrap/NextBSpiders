@@ -6,13 +6,14 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import json
+import scrapy
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import exists
 
 from NextBSpiders.configs.postgreconfig import db_config
-from NextBSpiders.items import TelegramMessage
+from NextBSpiders.items import TelegramMessage, TelegramGroupInfo
 
 """
 后续需要将所有的输出结果统一到一个pipeline里，根据爬虫选择输出方式
@@ -29,75 +30,81 @@ class AppspiderPostgreslPipeline(object):
         self.datas = []
         self.push_number = 50
 
-    def open_spider(self, spider):
+    def open_spider(self, spider: scrapy.Spider):
         engine = create_engine(self.conn_str)
         if self.session_maker is None:
             self.session_maker = scoped_session(
                 sessionmaker(autoflush=True, autocommit=False, bind=engine)
             )
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider: scrapy.Spider):
         if len(self.datas) >= self.push_number:
-            for data in self.datas:
-                message_id = data.get("message_id", -1)
-                chat_id = data.get("chat_id", -1)
-                is_exist = self.session_maker.query(
-                    exists().where(
-                        TelegramMessage.message_id == message_id,
-                        TelegramMessage.chat_id == chat_id,
-                    )
-                ).scalar()
-                if is_exist:
-                    continue
-                new_message = TelegramMessage()
-                new_message.message_id = message_id
-                new_message.chat_id = chat_id
-                new_message.user_id = data.get("user_id", -1)
-                new_message.user_name = data.get("user_name", "")
-                new_message.nick_name = data.get("nick_name", "")
-                new_message.postal_time = data.get("postal_time")
-                new_message.reply_to_msg_id = data.get("reply_to_msg_id", -1)
-                new_message.from_name = data.get("from_name", "")
-                new_message.from_time = data.get("from_time")
-                new_message.message = data.get("message", "")
-                new_message.text = data.get("text", "")
-                self.session_maker.add(new_message)
-            self.session_maker.commit()
-            self.datas = []
+            if spider.name == "telegram.url.tw":
+                self.save_group_info()
+            else:
+                self.save_datas()
         else:
             if item:
                 self.datas.append(item)
         return item
 
-    def close_spider(self, spider):
+    def close_spider(self, spider: scrapy.Spider):
         if len(self.datas) > 0:
-            for data in self.datas:
-                message_id = data.get("message_id", -1)
-                chat_id = data.get("chat_id", -1)
-                is_exist = self.session_maker.query(
-                    exists().where(
-                        TelegramMessage.message_id == message_id,
-                        TelegramMessage.chat_id == chat_id,
-                    )
-                ).scalar()
-                if is_exist:
-                    continue
-                new_message = TelegramMessage()
-                new_message.message_id = message_id
-                new_message.chat_id = chat_id
-                new_message.user_id = data.get("user_id", -1)
-                new_message.user_name = data.get("user_name", "")
-                new_message.nick_name = data.get("nick_name", "")
-                new_message.postal_time = data.get("postal_time")
-                new_message.reply_to_msg_id = data.get("reply_to_msg_id", -1)
-                new_message.from_name = data.get("from_name", "")
-                new_message.from_time = data.get("from_time")
-                new_message.message = data.get("message", "")
-                new_message.text = data.get("text", "")
-                self.session_maker.add(new_message)
-            self.session_maker.commit()
-            self.datas = []
+            if spider.name == "telegram.url.tw":
+                self.save_group_info()
+            else:
+                self.save_datas()
         self.session_maker.close_all()
+
+    def save_datas(self):
+        for data in self.datas:
+            message_id = data.get("message_id", -1)
+            chat_id = data.get("chat_id", -1)
+            is_exist = self.session_maker.query(
+                exists().where(
+                    TelegramMessage.message_id == message_id,
+                    TelegramMessage.chat_id == chat_id,
+                )
+            ).scalar()
+            if is_exist:
+                continue
+            new_message = TelegramMessage()
+            new_message.message_id = message_id
+            new_message.chat_id = chat_id
+            new_message.user_id = data.get("user_id", -1)
+            new_message.user_name = data.get("user_name", "")
+            new_message.nick_name = data.get("nick_name", "")
+            new_message.postal_time = data.get("postal_time")
+            new_message.reply_to_msg_id = data.get("reply_to_msg_id", -1)
+            new_message.from_name = data.get("from_name", "")
+            new_message.from_time = data.get("from_time")
+            new_message.message = data.get("message", "")
+            new_message.text = data.get("text", "")
+            self.session_maker.add(new_message)
+        self.session_maker.commit()
+        self.datas = []
+
+    def save_group_info(self):
+        for data in self.datas:
+            code = data.get("code", "")
+            if not code:
+                continue
+            is_exist = self.session_maker.query(
+                exists().where(TelegramGroupInfo.code == code)
+            ).scalar()
+            if is_exist:
+                continue
+            new_message = TelegramGroupInfo()
+            new_message.code = code
+            new_message.name = data.get("name", "")
+            new_message.category = data.get("category", "")
+            new_message.type = data.get("type", 1)
+            new_message.number = data.get("number", 0)
+            new_message.desc = data.get("desc", "")
+            new_message.tags = ",".join(data.get("tags", []))
+            self.session_maker.add(new_message)
+        self.session_maker.commit()
+        self.datas = []
 
 
 class AppspiderTxtPipeline(object):

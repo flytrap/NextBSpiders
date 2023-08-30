@@ -7,7 +7,7 @@
 
 import scrapy
 
-from sqlalchemy import Column, String, BigInteger
+from sqlalchemy import Column, String, BigInteger, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import DateTime, BIGINT, Integer
 
@@ -32,3 +32,18 @@ class TelegramMessage(Base):
     from_time = Column(DateTime)
     message = Column(String(5096))
     text = Column(String(5096))
+
+
+class TelegramGroupInfo(Base):
+    __tablename__ = "nextb_telegram_group"
+
+    # postgresql
+    id = Column(BIGINT(), primary_key=True, unique=True, autoincrement=True)
+
+    name = Column(String(255))
+    code = Column(String(255))  # 群代号
+    category = Column(String(255))
+    type = Column(Integer())  # 区分群组还是channel
+    number = Column(Integer())
+    desc = Column(Text())
+    tags = Column(String(5096))  # 逗号分割
