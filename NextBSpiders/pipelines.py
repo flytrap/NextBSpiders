@@ -6,18 +6,20 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import json
-import scrapy
 
+import scrapy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import exists
 
 from NextBSpiders.configs.postgreconfig import db_config
-from NextBSpiders.items import TelegramMessage, TelegramGroupInfo
+from NextBSpiders.items import TelegramGroupInfo, TelegramMessage
 
 """
 后续需要将所有的输出结果统一到一个pipeline里，根据爬虫选择输出方式
 """
+
+GROUP_SPIDER_LIST = ["telegram.url.tw"]
 
 
 class AppspiderPostgreslPipeline(object):
@@ -39,7 +41,7 @@ class AppspiderPostgreslPipeline(object):
 
     def process_item(self, item, spider: scrapy.Spider):
         if len(self.datas) >= self.push_number:
-            if spider.name == "telegram.url.tw":
+            if spider.name in GROUP_SPIDER_LIST:
                 self.save_group_info()
             else:
                 self.save_datas()
@@ -50,7 +52,7 @@ class AppspiderPostgreslPipeline(object):
 
     def close_spider(self, spider: scrapy.Spider):
         if len(self.datas) > 0:
-            if spider.name == "telegram.url.tw":
+            if spider.name in GROUP_SPIDER_LIST:
                 self.save_group_info()
             else:
                 self.save_datas()

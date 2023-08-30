@@ -12,6 +12,8 @@ NextBSpider执行telegram爬虫命令行工具
 """
 
 import argparse
+import base64
+import json
 import os
 import sys
 
@@ -50,6 +52,14 @@ def parse_cmd():
         epilog="使用方式：nextb-telegram-run-spider -c $config_file1 -c $config_file2",
     )
     parser.add_argument(
+        "-c",
+        "--config",
+        help="设置爬虫配置文件，可指定多个配置文件，默认为空列表",
+        type=str,
+        dest="config",
+        default="config.json",
+    )
+    parser.add_argument(
         "-n", "--name", help="指定爬虫名称", type=str, dest="name", default="telegram.url.tw"
     )
 
@@ -58,12 +68,19 @@ def parse_cmd():
     return args
 
 
-def telegram_run_spider(name: str):
+def telegram_run_spider(config_file: str, name: str):
     # 加载配置文件
+    with open(config_file, "r") as f:
+        data = f.read()
+    config_js = json.loads(data)
     # 初始化数据库
-    nb = NextBTGPOSTGRESDB()
-    nb.create_table()
-    cmd = "scrapy crawl {name} -L INFO".format(name=name)
+    # nb = NextBTGPOSTGRESDB()
+    # nb.create_table()
+
+    # base64配置参数，传递给爬虫
+    param_base64 = base64.b64encode(json.dumps(config_js).encode()).decode()
+    cmd = f"scrapy crawl {name} -L INFO -a param={param_base64}"
+
     cmdline.execute(cmd.split())
     # os.system(cmd)
 
@@ -74,7 +91,7 @@ def run():
     """
     args = parse_cmd()
     process_scrapy_cfg_file()
-    telegram_run_spider(args.name)
+    telegram_run_spider(args.config, args.name)
 
 
 if __name__ == "__main__":

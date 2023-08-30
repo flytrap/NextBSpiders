@@ -4,4 +4,6 @@ SQLAlchemy==1.4.31
 Telethon==1.24.0
 Twisted==22.4.0
 pysocks==1.7.1
-psycopg2==2.9.7
+psycopg2-binary==2.9.7
+beautifulsoup4==4.12.2
+loguru==0.7.0

@@ -1,8 +1,8 @@
 {
-    "api_id": "",
-    "api_hash": "",
-    "session_name": "c:/xxxx/nextb_binance_test_session.session",
-    "sqlite_db_name": "C:/xxxx/binance_test_2022_11.db",
+    "api_id": "28472237",
+    "api_hash": "93d51eca7760c7e22214f7071a977563",
+    "session_name": "nextb_binance_session.session",
+    "sqlite_db_name": "binance_test_2022_11.db",
     "proxy": {
         "protocal": "socks5",
         "ip": "127.0.0.1",
@@ -13,5 +13,6 @@
         "limit": 30,
         "last_message_id": -1,
         "offset_date": ""
-    }
+    },
+    "chat_code": "hao1234bot"
 }

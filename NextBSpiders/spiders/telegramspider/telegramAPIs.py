@@ -56,7 +56,7 @@ class TelegramAPIs(object):
         :param api_hash: api hash
         :param proxy: socks代理，默认为空
         """
-        if proxy is None:
+        if not proxy:
             self.client = TelegramClient(session_name, api_id, api_hash)
         else:
             self.client = TelegramClient(session_name, api_id, api_hash, proxy=proxy)
@@ -172,6 +172,19 @@ class TelegramAPIs(object):
         删除联系人
         """
         self.client(DeleteContactsRequest(ids))
+
+    def get_entity(self, code: str):
+        """
+        获取聊天实体
+        """
+        chat = self.client.get_entity(code)
+        return chat
+
+    def message_chat(self, chat: Chat):
+        self.client.send_message(chat, "/start")
+        for item in self.client.get_messages(chat):
+            if item.buttons:
+                print(item)
 
     def get_dialog_list(self):
         """
