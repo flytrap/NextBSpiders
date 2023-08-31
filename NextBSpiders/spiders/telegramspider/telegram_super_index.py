@@ -32,7 +32,6 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
         self.api_hash = self.param.get("api_hash")
         self.session_name = self.param.get("session_name")
         self.chat_code = self.param.get("chat_code")
-        self.lang = self.param.get("lang")  # 设置语言
         self.category_tag = "🏷 标签"
         proxy = self.param.get("proxy")
         self.clash_proxy = None
@@ -67,22 +66,35 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
         try:
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
-            if self.lang:  # todo: 更新语言
-                telegram_app.client.send_message(chat, "/lang")
 
-            telegram_app.client.send_message(chat, self.category_tag)
-            for menu in telegram_app.client.get_messages(chat):
-                # 获取菜单
-                for index, bt in enumerate([i for item in menu.buttons for i in item]):
-                    if bt.text in IGNORE_CATEGORIES:
-                        continue
-                    menu.click(index)
-                    for item in self.get_massages(telegram_app, chat, bt.text):
-                        yield item
+            telegram_app.client.send_message(chat, "/lang")
+            lang = list(telegram_app.client.get_messages(chat))[0]
+            for index, bt in enumerate([i for item in lang.buttons for i in item]):
+                logger.info(f"select lang: {bt.text}")
+                lang.click(index)
+
+                for item in self.iter_category_data(telegram_app, chat):
+                    item["lang"] = bt.text
+                    yield item
+
+                telegram_app.client.send_message(chat, "/lang")
+                lang = list(telegram_app.client.get_messages(chat))[0]
         except Exception as e:
             logger.exception(e)
         finally:
             telegram_app.close_client()
+
+    def iter_category_data(self, telegram_app, chat):
+        telegram_app.client.send_message(chat, "/tags")
+        for menu in telegram_app.client.get_messages(chat):
+            # 获取菜单
+            for index, bt in enumerate([i for item in menu.buttons for i in item]):
+                if bt.text in IGNORE_CATEGORIES:
+                    continue
+                logger.info(f"select menu: {bt.text}")
+                menu.click(index)
+                for item in self.get_massages(telegram_app, chat, bt.text):
+                    yield item
 
     def get_massages(self, telegram_app, chat, category: str):
         while True:
@@ -91,6 +103,21 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
                     m["category"] = category
                     yield m
                 ms = [i.text for item in message.buttons for i in item]
-                if "➡️ 下一页" not in ms:
+
+                if "➡️ 下一页" in ms:
+                    logger.info(f"click: 下一页")
+                    message.click(ms.index("➡️ 下一页"))
+                elif "➡️ Next" in ms:
+                    logger.info(f"click: Next")
+                    message.click(ms.index("➡️ Next"))
+                else:
+                    message.click(len(ms) - 1)
                     return
-                message.click(ms.index("➡️ 下一页"))
+
+    def set_lang(self, telegram_app, chat):
+        telegram_app.client.send_message(chat, "/lang")
+        for message in telegram_app.client.get_messages(chat):
+            for index, bt in [i for item in message.buttons for i in item]:
+                if bt.text == self.lang:
+                    message.click(index)
+                    break
