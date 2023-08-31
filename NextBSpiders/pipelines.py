@@ -99,6 +99,7 @@ class AppspiderPostgreslPipeline(object):
             new_message = TelegramGroupInfo()
             new_message.code = code
             new_message.name = data.get("name", "")
+            new_message.lang = data.get("lang", "")
             new_message.category = data.get("category", "")
             new_message.type = data.get("type", 1)
             new_message.number = data.get("number", 0)
