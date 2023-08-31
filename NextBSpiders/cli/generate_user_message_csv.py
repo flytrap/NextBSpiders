@@ -6,6 +6,7 @@
 # @Software : Visual Studio Code
 # @WeChat   : NextB
 
+from loguru import logger
 import datetime
 import argparse
 import urllib
@@ -16,13 +17,13 @@ from NextBSpiders.libs.nextb_spier_db import NextBTGSQLITEDB
 def check_url_valid(url):
     try:
         urllib.request.urlopen(url)
-        print("{}：检测到该用户存在头像".format(url))
+        logger.info("{}：检测到该用户存在头像".format(url))
     except urllib.error.HTTPError as e:
         if e.code == 404:
-            print("{}：未发现该用户头像，使用默认头像".format(url))
+            logger.info("{}：未发现该用户头像，使用默认头像".format(url))
             return False
     except Exception as e:
-        print("{}：头像检测失败，使用默认头像".format(url))
+        logger.info("{}：头像检测失败，使用默认头像".format(url))
 
     return True
 
@@ -123,7 +124,7 @@ def geneerate_user_message(args):
     start_time = None
     finish_time = None
     # 统计用户发言数量
-    print("开始统计用户发言数量...")
+    logger.info("开始统计用户发言数量...")
     for data in db.get_messages(begin_offset_date, end_offset_date):
         user_id = data[0]
         nick_name = data[1]
@@ -144,8 +145,8 @@ def geneerate_user_message(args):
                 user_id_nickname[user_id].append(nick_name)
         else:
             user_id_nickname[user_id] = [nick_name]
-    print("完成统计用户发言数量...")
-    print("开始生成用户发言数量统计csv文件...")
+    logger.info("完成统计用户发言数量...")
+    logger.info("开始生成用户发言数量统计csv文件...")
     # 模拟输入起始及截止日期
     begin = datetime.date(start_time.year, start_time.month, start_time.day)
     end = datetime.date(finish_time.year, finish_time.month, finish_time.day)
@@ -187,8 +188,8 @@ def geneerate_user_message(args):
         f.write(head + "\n")
         f.write("\n".join(r_datas))
         f.flush()
-    print("csv文件生成完成，文件保存为：{}...".format(csv_file))
-    print("过滤条数设定为{}时共计筛选{}个用户跨越{}天的聊天数量...".format(cut_off, len(r_datas), dlt_days))
+    logger.info("csv文件生成完成，文件保存为：{}...".format(csv_file))
+    logger.info("过滤条数设定为{}时共计筛选{}个用户跨越{}天的聊天数量...".format(cut_off, len(r_datas), dlt_days))
 
 
 def run():

@@ -8,6 +8,7 @@
 
 
 import os
+from loguru import logger
 import scrapy
 import base64
 import json
@@ -43,7 +44,7 @@ class TelegramScanMessages(scrapy.Spider, ABC):
 
     def parse_list(self, response):
         if not os.path.exists(self.session_name):
-            print("session not exists.")
+            logger.info("session not exists.")
             return None
         yield from self.scan_messages()
 
@@ -64,7 +65,7 @@ class TelegramScanMessages(scrapy.Spider, ABC):
                     proxy=self.clash_proxy,
                 )
         except Exception as e:
-            print(str(e))
+            logger.exception(e)
             return None
         try:
             # 开始爬取
@@ -84,10 +85,10 @@ class TelegramScanMessages(scrapy.Spider, ABC):
                     for m in telegram_app.scan_message(chat=chat, **param):
                         yield m
                 except Exception as e:
-                    print(str(e))
+                    logger.exception(e)
             else:
-                print("Nont find Chat")
+                logger.info("Nont find Chat")
         except Exception as e:
-            print(str(e))
+            logger.exception(e)
         finally:
             telegram_app.close_client()

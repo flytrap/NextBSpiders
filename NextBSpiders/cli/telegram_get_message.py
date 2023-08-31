@@ -17,6 +17,8 @@ import json
 import os
 import sys
 
+from loguru import logger
+
 sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
@@ -74,7 +76,7 @@ def telegram_get_message(config_file):
         "offset_date": None,
         "last_message_id": group.get("last_message_id"),
     }
-    print("消息ID,用户昵称,用户username,用户id,发送时间,消息内容")
+    logger.info("消息ID,用户昵称,用户username,用户id,发送时间,消息内容")
     for data in ta.scan_message(chat, **param):
         """data数据格式
         {
@@ -98,7 +100,7 @@ def telegram_get_message(config_file):
             "%Y-%m-%d %H:%M:%S+%Z"
         )
         message = data.get("message", "")
-        print(
+        logger.info(
             "{},{},{},{},{},{}".format(
                 message_id, nick_name, user_name, user_id, postal_time, message
             )

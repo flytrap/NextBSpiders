@@ -6,9 +6,11 @@
 # @Software : Visual Studio Code
 # @WeChat   : NextB
 
-
-import datetime
 import argparse
+import datetime
+
+from loguru import logger
+
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.libs.nextb_spier_db import NextBTGSQLITEDB
 
@@ -51,7 +53,9 @@ def statics_db(args):
     first_message_postal_time = "未获取"
     first_nick_name = ""
     if first_message:
-        first_message_postal_time = datetime.datetime.strftime(first_message.postal_time, "%Y-%m-%d %H:%M:%S")
+        first_message_postal_time = datetime.datetime.strftime(
+            first_message.postal_time, "%Y-%m-%d %H:%M:%S"
+        )
         first_nick_name = first_message.nick_name
         chat_id = first_message.chat_id
     # 获取最后一条发言
@@ -59,18 +63,20 @@ def statics_db(args):
     last_message_postal_time = "未获取到"
     last_nick_name = ""
     if last_message:
-        last_message_postal_time = datetime.datetime.strftime(last_message.postal_time, "%Y-%m-%d %H:%M:%S")
+        last_message_postal_time = datetime.datetime.strftime(
+            last_message.postal_time, "%Y-%m-%d %H:%M:%S"
+        )
         last_nick_name = last_message.nick_name
         chat_id = first_message.chat_id
 
     # 打印统计信息
-    print("群组ID: {}".format(chat_id))
-    print("群组消息数量: {}".format(message_count))
-    print("群组用户数量: {}".format(user_count))
-    print("最早发言人: {}".format(first_nick_name))
-    print("最早消息发送时间(UTC): {}".format(first_message_postal_time))
-    print("最近发言人: {}".format(last_nick_name))
-    print("最近消息发送时间(UTC): {}".format(last_message_postal_time))
+    logger.info("群组ID: {}".format(chat_id))
+    logger.info("群组消息数量: {}".format(message_count))
+    logger.info("群组用户数量: {}".format(user_count))
+    logger.info("最早发言人: {}".format(first_nick_name))
+    logger.info("最早消息发送时间(UTC): {}".format(first_message_postal_time))
+    logger.info("最近发言人: {}".format(last_nick_name))
+    logger.info("最近消息发送时间(UTC): {}".format(last_message_postal_time))
 
     # 关闭数据库
     db.close()

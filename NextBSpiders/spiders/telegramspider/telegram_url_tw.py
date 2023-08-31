@@ -53,7 +53,6 @@ class TelegramScanMessages(scrapy.Spider, ABC):
                 yield scrapy.Request(
                     f"{base_url}/{a.attrs['href']}", meta={"category": a.text}
                 )
-        print(uls)
 
     def parse_detail(self, soup: BeautifulSoup, category: str):
         ols = soup.find_all("ol")

@@ -13,7 +13,6 @@ from loguru import logger
 
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
-from telethon.tl.patched import Message
 from utils.parase import ParseInfo
 
 IGNORE_CATEGORIES = ["↩️ 返回"]

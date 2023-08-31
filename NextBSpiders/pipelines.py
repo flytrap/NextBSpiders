@@ -19,7 +19,7 @@ from NextBSpiders.items import TelegramGroupInfo, TelegramMessage
 后续需要将所有的输出结果统一到一个pipeline里，根据爬虫选择输出方式
 """
 
-GROUP_SPIDER_LIST = ["telegram.url.tw"]
+GROUP_SPIDER_LIST = ["telegram.url.tw", "telegramSuperIndex"]
 
 
 class AppspiderPostgreslPipeline(object):

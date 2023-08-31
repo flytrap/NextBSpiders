@@ -13,6 +13,8 @@ __doc__ = """
 
 import json
 import argparse
+
+from loguru import logger
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
@@ -93,7 +95,7 @@ def telegram_get_user_photo(args):
     elif args.name:
         nick_names.append(args.name)
     else:
-        print("用户昵称或者用户昵称文件必须设置一个。当设置用户昵称文件之后，会忽略用户昵称参数。")
+        logger.info("用户昵称或者用户昵称文件必须设置一个。当设置用户昵称文件之后，会忽略用户昵称参数。")
         exit(0)
     config_file = args.config
     # 加载配置文件

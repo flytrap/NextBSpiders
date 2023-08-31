@@ -1,5 +1,6 @@
 import os
 import sys
+from loguru import logger
 
 import pymysql
 
@@ -59,7 +60,7 @@ def main():
         try:
             results = f(item.text)
         except Exception as e:
-            print(e)
+            logger.info(e)
             continue
         if isinstance(results, dict):
             results = [results]
@@ -81,7 +82,7 @@ def main():
                 try:
                     cursor.execute(sql)
                 except Exception as e:
-                    print(e)
+                    logger.info(e)
                     cursor.execute(
                         f"insert into tg_group(`name`,`code`,`category`,`type`,`number`) values({name},{code},{cid},{tp},{num})"
                     )
@@ -94,7 +95,7 @@ def main():
                         cursor.execute(sql)
                         db.commit()
                     except Exception as e:
-                        print(e)
+                        logger.info(e)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@
 import re
 
 import jieba
+from loguru import logger
 
 
 class ParseInfo(object):
@@ -66,7 +67,7 @@ class ParseInfo(object):
             try:
                 result["number"] = cls.parse_number(name)
             except Exception as e:
-                print(e)
+                logger.exception(e)
             results.append(result)
 
         return results
@@ -90,10 +91,10 @@ class ParseInfo(object):
         if not li:
             return 0
         if text.lower().endswith("k"):
-            return int(li[-1]) * 1000
+            return int(float(li[-1]) * 1000)
         elif text.lower().endswith("m"):
-            return int(li[-1]) * 1000000
-        return int(li[-1])
+            return int(float(li[-1]) * 1000000)
+        return int(float(li[-1]))
 
     @staticmethod
     def check_tag(text: str) -> bool:

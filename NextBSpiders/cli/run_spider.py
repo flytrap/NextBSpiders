@@ -74,8 +74,8 @@ def telegram_run_spider(config_file: str, name: str):
         data = f.read()
     config_js = json.loads(data)
     # 初始化数据库
-    # nb = NextBTGPOSTGRESDB()
-    # nb.create_table()
+    nb = NextBTGPOSTGRESDB()
+    nb.create_table()
 
     # base64配置参数，传递给爬虫
     param_base64 = base64.b64encode(json.dumps(config_js).encode()).decode()

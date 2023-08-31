@@ -12,6 +12,7 @@ import time
 import datetime
 import logging
 from random import randint
+from loguru import logger
 from telethon import TelegramClient, sync
 from telethon.tl.functions.channels import (
     GetFullChannelRequest,
@@ -136,20 +137,20 @@ class TelegramAPIs(object):
             if is_all and hasattr(dialog.entity, "title"):
                 chat = dialog.entity
                 self.client.delete_dialog(chat)
-                print("已离开<{}>群组".format(dialog.entity.title))
+                logger.info("已离开<{}>群组".format(dialog.entity.title))
             # 删除delete account
             elif dialog.name == "":
                 chat = dialog.entity
                 self.client.delete_dialog(chat)
-                print("已删除Deleted Account用户对话框")
+                logger.info("已删除Deleted Account用户对话框")
             elif is_new_user:
                 chat = dialog.entity
                 self.client.delete_dialog(chat)
-                print("已删除{}用户对话框".format(dialog.name))
+                logger.info("已删除{}用户对话框".format(dialog.name))
             elif is_all:
                 chat = dialog.entity
                 self.client.delete_dialog(chat)
-                print("已删除{}用户对话框".format(dialog.name))
+                logger.info("已删除{}用户对话框".format(dialog.name))
             else:
                 pass
 
@@ -184,7 +185,7 @@ class TelegramAPIs(object):
         self.client.send_message(chat, "/start")
         for item in self.client.get_messages(chat):
             if item.buttons:
-                print(item)
+                logger.info(item)
 
     def get_dialog_list(self):
         """
@@ -284,7 +285,7 @@ class TelegramAPIs(object):
                 try:
                     content = message.message
                 except Exception as e:
-                    print(e)
+                    logger.exception(e)
                 if content == "":
                     continue
                 m = dict()
@@ -331,7 +332,7 @@ class TelegramAPIs(object):
                     time.sleep(waterline)
                 count += 1
                 yield m
-        print("total: %d" % count)
+        logger.info("total: %d" % count)
 
     def download_user_photo(self, chat_id, nick_names, download_path="./", compress=0):
         """
@@ -346,7 +347,7 @@ class TelegramAPIs(object):
             try:
                 from PIL import Image
             except Exception as e:
-                print(
+                logger.info(
                     "检测到未安装PIL库，无法对头像进行缩放处理，保存原始头像。若要保存缩放后的头像，请安装PIL，安装命令：pip install Pillow"
                 )
                 use_pil_image = False
@@ -363,11 +364,11 @@ class TelegramAPIs(object):
                     )
                 )
             except Exception as e:
-                print("查找《{}》用户失败，失败原因：{}".format(nick_name, str(e)))
+                logger.info("查找《{}》用户失败，失败原因：{}".format(nick_name, str(e)))
                 continue
 
             if not participants.users:
-                print("未找到《{}》用户。".format(nick_name))
+                logger.info("未找到《{}》用户。".format(nick_name))
                 continue
 
             for entity in participants.users:
@@ -381,13 +382,15 @@ class TelegramAPIs(object):
                         picture = Image.open(photo_down)
                         picture = picture.resize((64, 64))
                         picture.save(photo_down)
-                        print("《{}》用户压缩头像（64 * 64）保存至：{}".format(nick_name, photo_down))
+                        logger.info(
+                            "《{}》用户压缩头像（64 * 64）保存至：{}".format(nick_name, photo_down)
+                        )
                     else:
-                        print("《{}》用户原始头像保存至：{}".format(nick_name, photo_down))
+                        logger.info("《{}》用户原始头像保存至：{}".format(nick_name, photo_down))
                 else:
-                    print("《{}》用户没有使用自定义头像。".format(nick_name))
+                    logger.info("《{}》用户没有使用自定义头像。".format(nick_name))
 
-            print(
+            logger.info(
                 "在《{}》群中找到{}个昵称为《{}》的用户，休眠5-10秒".format(
                     chat.title, len(participants.users), nick_name
                 )

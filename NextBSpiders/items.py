@@ -5,9 +5,7 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
-import scrapy
-
-from sqlalchemy import Column, String, BigInteger, Text
+from sqlalchemy import Column, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import DateTime, BIGINT, Integer
 
@@ -42,6 +40,7 @@ class TelegramGroupInfo(Base):
 
     name = Column(String(255))
     code = Column(String(255))  # 群代号
+    lang = Column(String(255))  # 语言
     category = Column(String(255))
     type = Column(Integer())  # 区分群组还是channel
     number = Column(Integer())

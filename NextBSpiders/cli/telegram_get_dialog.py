@@ -10,11 +10,12 @@
 __doc__ = """
 获取telegram的消息框
 """
-
 import argparse
 import json
 import os
 import sys
+
+from loguru import logger
 
 sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders import NEXTBSPIDER_VERSION
@@ -66,7 +67,7 @@ def telegram_get_dialog(config_file):
         session_name=session_name, api_id=api_id, api_hash=api_hash, proxy=clash_proxy
     )
     # 获取所有群组对话框
-    print("群组ID,群组username,群组title,群组类型,群成员数量,未读消息数")
+    logger.info("群组ID,群组username,群组title,群组类型,群成员数量,未读消息数")
     for dialog in ta.get_dialog_list():
         """dialog格式
         {
@@ -87,7 +88,7 @@ def telegram_get_dialog(config_file):
         if dialog.get("result", "failed") == "success":
             data = dialog.get("data", None)
             if data is None:
-                print("获取对话框数据失败")
+                logger.info("获取对话框数据失败")
                 continue
             group_id = data.get("id", "")
             group_title = data.get("title", "")
@@ -95,7 +96,7 @@ def telegram_get_dialog(config_file):
             group_megagroup = data.get("megagroup", "")
             group_member_count = data.get("member_count", "")
             group_unread_count = data.get("unread_count", "")
-            print(
+            logger.info(
                 "{},{},{},{},{},{}".format(
                     group_id,
                     group_title,
