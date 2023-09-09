@@ -120,18 +120,19 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             index += 1
 
     def get_massages(self, telegram_app, chat, category: str):
-        txt = ""
+        cs = set()
         while True:
             ms = list(telegram_app.client.get_messages(chat))
             if not ms:
                 logger.info("nod found messages")
                 return
             message = ms[0]
-            if message.text == txt:
-                break
-            txt = message.text
-            for m in ParseInfo.parse_items(message.text):
+            li = ParseInfo.parse_items(message.text)
+            for m in li:
                 m["category"] = category
+                if m["code"] in cs:  # 陷入循环了
+                    return
+                cs.add(m["code"])
                 yield m
             bts = [i for item in message.buttons for i in item]
             ms = [i.text for i in bts]
