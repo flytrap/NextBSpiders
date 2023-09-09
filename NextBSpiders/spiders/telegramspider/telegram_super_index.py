@@ -6,15 +6,14 @@
 import base64
 import json
 import os
-from abc import ABC
 import random
 import time
+from abc import ABC
 
 import scrapy
 from loguru import logger
 
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
-
 from utils.parase import ParseInfo
 
 IGNORE_CATEGORIES = ["↩️ 返回"]
@@ -69,36 +68,54 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
 
-            telegram_app.client.send_message(chat, "/lang")
-            lang = list(telegram_app.client.get_messages(chat))[0]
-            for index, bt in enumerate([i for item in lang.buttons for i in item]):
+            ls = [1]
+            index = 0
+            while index < len(ls):
+                telegram_app.client.send_message(chat, "/lang")
+                lang = list(telegram_app.client.get_messages(chat))[0]
+                ls = [i for item in lang.buttons for i in item]
+
+                bt = ls[index]
                 logger.info(f"select lang: {bt.text}")
                 self.sleep()
-                lang.click(index)
+                try:
+                    bt.click()
+                except Exception as e:
+                    logger.warning(e)
+                    continue
 
                 for item in self.iter_category_data(telegram_app, chat):
                     item["lang"] = bt.text
                     yield item
-
-                telegram_app.client.send_message(chat, "/lang")
-                lang = list(telegram_app.client.get_messages(chat))[0]
         except Exception as e:
             logger.exception(e)
         finally:
             telegram_app.close_client()
 
-    def iter_category_data(self, telegram_app, chat):
+    def iter_category_data(self, telegram_app, chat, num=0) -> int:
         telegram_app.client.send_message(chat, "/tags")
-        for menu in telegram_app.client.get_messages(chat):
-            # 获取菜单
-            for index, bt in enumerate([i for item in menu.buttons for i in item]):
-                if bt.text in IGNORE_CATEGORIES:
-                    continue
-                self.sleep()
-                logger.info(f"select menu: {bt.text}")
-                menu.click(index)
-                for item in self.get_massages(telegram_app, chat, bt.text):
-                    yield item
+        # 获取菜单
+        index = 0
+        ms = [1]
+        while index < len(ms):
+            menus = list(telegram_app.client.get_messages(chat))
+            if not menus:
+                telegram_app.client.send_message(chat, "/tags")
+                continue
+            ms = [i for item in menus[0].buttons for i in item]
+            bt = ms[index]
+            if bt.text in IGNORE_CATEGORIES:
+                continue
+            self.sleep()
+            logger.info(f"select menu: {bt.text}")
+            try:
+                bt.click()
+            except Exception as e:
+                logger.warning(e)
+                continue
+            for item in self.get_massages(telegram_app, chat, bt.text):
+                yield item
+            index += 1
 
     def get_massages(self, telegram_app, chat, category: str):
         while True:
