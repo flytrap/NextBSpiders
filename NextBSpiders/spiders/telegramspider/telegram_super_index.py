@@ -7,6 +7,8 @@ import base64
 import json
 import os
 from abc import ABC
+import random
+import time
 
 import scrapy
 from loguru import logger
@@ -71,6 +73,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             lang = list(telegram_app.client.get_messages(chat))[0]
             for index, bt in enumerate([i for item in lang.buttons for i in item]):
                 logger.info(f"select lang: {bt.text}")
+                self.sleep()
                 lang.click(index)
 
                 for item in self.iter_category_data(telegram_app, chat):
@@ -91,6 +94,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             for index, bt in enumerate([i for item in menu.buttons for i in item]):
                 if bt.text in IGNORE_CATEGORIES:
                     continue
+                self.sleep()
                 logger.info(f"select menu: {bt.text}")
                 menu.click(index)
                 for item in self.get_massages(telegram_app, chat, bt.text):
@@ -104,6 +108,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
                     yield m
                 ms = [i.text for item in message.buttons for i in item]
 
+                self.sleep()
                 if "➡️ 下一页" in ms:
                     logger.info(f"click: 下一页")
                     message.click(ms.index("➡️ 下一页"))
@@ -121,3 +126,8 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
                 if bt.text == self.lang:
                     message.click(index)
                     break
+
+    def sleep(self):
+        i = random.random() + random.randint(1, 10)
+        logger.info(f"sleep: {i}")
+        time.sleep(i)
