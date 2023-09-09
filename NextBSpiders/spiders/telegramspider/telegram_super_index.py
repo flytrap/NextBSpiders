@@ -110,15 +110,18 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             for m in ParseInfo.parse_items(message.text):
                 m["category"] = category
                 yield m
-            ms = [i.text for item in message.buttons for i in item]
+            bts = [i for item in message.buttons for i in item]
+            ms = [i.text for i in bts]
 
             self.sleep()
             if "➡️ 下一页" in ms:
                 logger.info(f"click: 下一页")
-                message.click(ms.index("➡️ 下一页"))
+                bts[ms.index("➡️ 下一页")].click()
+                # message.click(ms.index("➡️ 下一页"))
             elif "➡️ Next" in ms:
                 logger.info(f"click: Next")
-                message.click(ms.index("➡️ Next"))
+                bts[ms.index("➡️ Next")].click()
+                # message.click(ms.index("➡️ Next"))
             else:
                 message.click(len(ms) - 1)
                 return
