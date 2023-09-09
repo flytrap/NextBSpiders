@@ -109,15 +109,15 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
                 ms = [i.text for item in message.buttons for i in item]
 
                 self.sleep()
-                if "➡️ 下一页" in ms:
-                    logger.info(f"click: 下一页")
-                    message.click(ms.index("➡️ 下一页"))
-                elif "➡️ Next" in ms:
-                    logger.info(f"click: Next")
-                    message.click(ms.index("➡️ Next"))
-                else:
-                    message.click(len(ms) - 1)
-                    return
+            if "➡️ 下一页" in ms:
+                logger.info(f"click: 下一页")
+                message.click(ms.index("➡️ 下一页"))
+            elif "➡️ Next" in ms:
+                logger.info(f"click: Next")
+                message.click(ms.index("➡️ Next"))
+            else:
+                message.click(len(ms) - 1)
+                return
 
     def set_lang(self, telegram_app, chat):
         telegram_app.client.send_message(chat, "/lang")
