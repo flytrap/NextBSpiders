@@ -120,12 +120,16 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             index += 1
 
     def get_massages(self, telegram_app, chat, category: str):
+        txt = ""
         while True:
             ms = list(telegram_app.client.get_messages(chat))
             if not ms:
                 logger.info("nod found messages")
                 return
             message = ms[0]
+            if message.text == txt:
+                break
+            txt = message.text
             for m in ParseInfo.parse_items(message.text):
                 m["category"] = category
                 yield m
