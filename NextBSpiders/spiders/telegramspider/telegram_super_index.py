@@ -87,6 +87,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
                 for item in self.iter_category_data(telegram_app, chat):
                     item["lang"] = bt.text
                     yield item
+                index += 1
         except Exception as e:
             logger.exception(e)
         finally:
