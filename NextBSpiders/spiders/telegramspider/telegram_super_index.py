@@ -94,16 +94,17 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             telegram_app.close_client()
 
     def iter_category_data(self, telegram_app, chat, num=0) -> int:
-        telegram_app.client.send_message(chat, "/tags")
         # 获取菜单
         index = 0
         ms = [1]
-        while index < len(ms):
+        while True:
+            telegram_app.client.send_message(chat, "/tags")
             menus = list(telegram_app.client.get_messages(chat))
             if not menus:
-                telegram_app.client.send_message(chat, "/tags")
                 continue
-            ms = [i for item in menus[0].buttons for i in item]
+            ms = [i for item in menus[-1].buttons for i in item]
+            if index >= len(ms):
+                return
             bt = ms[index]
             if bt.text in IGNORE_CATEGORIES:
                 continue
