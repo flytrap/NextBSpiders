@@ -63,19 +63,20 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             )
         except Exception as e:
             logger.warning(e)
-            return None
+            return
         try:
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
 
-            self.lang_scan(telegram_app, chat)
+            for item in self.lang_scan(telegram_app, chat):
+                yield item
         except Exception as e:
             logger.exception(e)
         finally:
             telegram_app.close_client()
 
     def top_scan(self, telegram_app, chat):
-        """通过语言分组获取数据"""
+        """通过关键词排行获取数据"""
         ls = [1, 2]
         index = 0
         while index < len(ls):
