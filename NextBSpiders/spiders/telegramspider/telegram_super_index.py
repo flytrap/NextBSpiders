@@ -68,7 +68,9 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
 
-            for item in self.lang_scan(telegram_app, chat):
+            result = self.top_scan(telegram_app, chat)
+            # result = self.lang_scan(telegram_app, chat)
+            for item in result:
                 yield item
         except Exception as e:
             logger.exception(e)
@@ -77,26 +79,28 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
 
     def top_scan(self, telegram_app, chat):
         """通过关键词排行获取数据"""
-        ls = [1, 2]
-        index = 0
-        while index < len(ls):
-            telegram_app.client.send_message(chat, "/lang")
-            lang = list(telegram_app.client.get_messages(chat))[0]
-            ls = [i for item in lang.buttons for i in item]
+        telegram_app.client.send_message(chat, "/group")
+        msg = list(telegram_app.client.get_messages(chat))[-1]
+        if not msg.buttons:
+            msg = list(telegram_app.client.get_messages(chat))[-1]
+        ls = [i for item in msg.buttons for i in item]
 
-            bt = ls[index]
-            logger.info(f"select lang: {bt.text}")
-            self.sleep()
-            try:
-                bt.click()
-            except Exception as e:
-                logger.warning(e)
-                continue
+        ls[-2].click()  # 关键词排名广告
+        msg = list(telegram_app.client.get_messages(chat))[-1]
+        ls = [i for item in msg.buttons for i in item]
+        ls[1].click()  # 关键词排名广告
 
-            for item in self.iter_category_data(telegram_app, chat):
-                item["lang"] = bt.text
+        msg = list(telegram_app.client.get_messages(chat))[-1]
+        ls = [i for item in msg.buttons for i in item]
+        ls[1].click()  # 热门关键词
+
+        msg = list(telegram_app.client.get_messages(chat))[-1]
+        ls = [i.text.split("(")[0] for item in msg.buttons for i in item]  # 所有关键词
+        for keyword in ls:
+            logger.info(keyword)
+            telegram_app.client.send_message(chat, keyword)
+            for item in self.get_massages(telegram_app, chat, f"top:{keyword}"):
                 yield item
-            index += 1
 
     def lang_scan(self, telegram_app, chat):
         """通过语言分组获取数据"""
@@ -167,6 +171,8 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
                 yield m
             if num >= 30:  # 陷入循环了
                 return
+            if not message.buttons:
+                continue
             bts = [i for item in message.buttons for i in item]
             ms = [i.text for i in bts]
 
