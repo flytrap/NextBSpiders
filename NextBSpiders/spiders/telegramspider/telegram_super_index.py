@@ -68,30 +68,57 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
 
-            ls = [1]
-            index = 0
-            while index < len(ls):
-                telegram_app.client.send_message(chat, "/lang")
-                lang = list(telegram_app.client.get_messages(chat))[0]
-                ls = [i for item in lang.buttons for i in item]
-
-                bt = ls[index]
-                logger.info(f"select lang: {bt.text}")
-                self.sleep()
-                try:
-                    bt.click()
-                except Exception as e:
-                    logger.warning(e)
-                    continue
-
-                for item in self.iter_category_data(telegram_app, chat):
-                    item["lang"] = bt.text
-                    yield item
-                index += 1
+            self.lang_scan(telegram_app, chat)
         except Exception as e:
             logger.exception(e)
         finally:
             telegram_app.close_client()
+
+    def top_scan(self, telegram_app, chat):
+        """通过语言分组获取数据"""
+        ls = [1, 2]
+        index = 0
+        while index < len(ls):
+            telegram_app.client.send_message(chat, "/lang")
+            lang = list(telegram_app.client.get_messages(chat))[0]
+            ls = [i for item in lang.buttons for i in item]
+
+            bt = ls[index]
+            logger.info(f"select lang: {bt.text}")
+            self.sleep()
+            try:
+                bt.click()
+            except Exception as e:
+                logger.warning(e)
+                continue
+
+            for item in self.iter_category_data(telegram_app, chat):
+                item["lang"] = bt.text
+                yield item
+            index += 1
+
+    def lang_scan(self, telegram_app, chat):
+        """通过语言分组获取数据"""
+        ls = [1, 2]
+        index = 1
+        while index < len(ls):
+            telegram_app.client.send_message(chat, "/lang")
+            lang = list(telegram_app.client.get_messages(chat))[0]
+            ls = [i for item in lang.buttons for i in item]
+
+            bt = ls[index]
+            logger.info(f"select lang: {bt.text}")
+            self.sleep()
+            try:
+                bt.click()
+            except Exception as e:
+                logger.warning(e)
+                continue
+
+            for item in self.iter_category_data(telegram_app, chat):
+                item["lang"] = bt.text
+                yield item
+            index += 1
 
     def iter_category_data(self, telegram_app, chat, num=0) -> int:
         # 获取菜单
@@ -101,6 +128,8 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             telegram_app.client.send_message(chat, "/tags")
             menus = list(telegram_app.client.get_messages(chat))
             if not menus:
+                continue
+            if not menus[-1].buttons:
                 continue
             ms = [i for item in menus[-1].buttons for i in item]
             if index >= len(ms):
@@ -121,19 +150,22 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
 
     def get_massages(self, telegram_app, chat, category: str):
         cs = set()
+        num = 0
         while True:
             ms = list(telegram_app.client.get_messages(chat))
             if not ms:
-                logger.info("nod found messages")
+                logger.info("not found messages")
                 return
             message = ms[0]
             li = ParseInfo.parse_items(message.text)
             for m in li:
                 m["category"] = category
-                if m["code"] in cs:  # 陷入循环了
-                    return
+                if m["code"] in cs:
+                    num += 1
                 cs.add(m["code"])
                 yield m
+            if num >= 30:  # 陷入循环了
+                return
             bts = [i for item in message.buttons for i in item]
             ms = [i.text for i in bts]
 
