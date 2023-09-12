@@ -15,10 +15,10 @@ class ParseInfo(object):
         li = text.split("\n")
         result = {"tags": []}
         for i, item in enumerate(li):
-            names = re.findall("\[(.*)\]", item)
-            if not names:
-                continue
             if "标题" in item:
+                names = re.findall("\[(.*)\]", item)
+                if not names:
+                    continue
                 result["name"] = names[0]
                 result["code"] = re.findall("\((.*)\)", item)[0].split("/")[-1]
             elif "标签" in item:

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "./v1;pb";
+package tg.v1;
+
+service TgBotService {
+    rpc ImportData(stream DataItem) returns (stream ImportResponse){}  // 导入组数据
+}
+
+message DataItem {
+    int64 tid = 1;
+    int32 type = 2;
+    int32 number = 3;
+    string code = 4;
+    string name = 5;
+    string desc = 6;
+    string category = 7;
+    string lang = 8;
+    repeated string tags = 9;
+}
+
+message ImportResponse {
+    bool status = 1;
+    string msg = 2;
+}
