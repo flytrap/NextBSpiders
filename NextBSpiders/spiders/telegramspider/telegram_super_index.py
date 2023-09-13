@@ -68,8 +68,8 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
 
-            result = self.top_scan(telegram_app, chat)
-            # result = self.lang_scan(telegram_app, chat)
+            # result = self.top_scan(telegram_app, chat)
+            result = self.lang_scan(telegram_app, chat)
             for item in result:
                 yield item
         except Exception as e:
@@ -108,6 +108,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
         index = 1
         while index < len(ls):
             telegram_app.client.send_message(chat, "/lang")
+            self.sleep()
             lang = list(telegram_app.client.get_messages(chat))[0]
             ls = [i for item in lang.buttons for i in item]
 

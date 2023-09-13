@@ -91,10 +91,22 @@ class AppspiderPostgreslPipeline(object):
             code = data.get("code", "")
             if not code:
                 continue
-            is_exist = self.session_maker.query(
-                exists().where(TelegramGroupInfo.code == code)
-            ).scalar()
-            if is_exist:
+            # is_exist = self.session_maker.query(
+            #     exists().where(TelegramGroupInfo.code == code)
+            # ).scalar()
+            m: TelegramGroupInfo = (
+                self.session_maker.query(TelegramGroupInfo)
+                .filter(TelegramGroupInfo.code == code)
+                .first()
+            )
+            if m:
+                m.tags = ",".join(data.get("tags", []))
+                if ":" in m.category and data.get("category", ""):
+                    m.category = data["category"]
+                if not m.desc and data.get("desc", ""):
+                    m.desc = data["desc"]
+                if not m.number and data.get("number", 0):
+                    m.number = data["number"]
                 continue
             new_message = TelegramGroupInfo()
             new_message.code = code
