@@ -4,22 +4,148 @@ option go_package = "./v1;pb";
 package tg.v1;
 
 service TgBotService {
-    rpc ImportData(stream DataItem) returns (stream ImportResponse){}  // 导入组数据
+    rpc ImportData(stream DataItem) returns (stream RetInfo){}  // 导入组数据
+    rpc SearchData(DataSearchRequest) returns (QueryDataResp){}
+    rpc UpdateData(DataItem) returns (RetInfo) {}
+    rpc DeleteData(DeleteCodes) returns (RetInfo) {}
+}
+
+service AdService {
+    rpc ListAd(AdFilter) returns (QueryAdResp) {}
+    rpc CreateAd(Ad) returns (RetInfo) {}
+    rpc UpdateAd(Ad) returns (RetInfo) {}
+    rpc DeleteAd(DeleteIds) returns (RetInfo) {}
+}
+
+service CategoryService {
+    rpc ListCategory(QueryRequest) returns (QueryTagResp) {}
+    rpc CreateCategory(Tag) returns (RetInfo) {}
+    rpc UpdateCategory(Tag) returns (RetInfo) {}
+    rpc DeleteCategory(DeleteIds) returns (RetInfo) {}
+}
+
+service TagService {
+    rpc ListTag(QueryRequest) returns (QueryTagResp) {}
+    rpc GetOrCreateTag(Tag) returns (RetInfo) {}
+    rpc UpdateTag(Tag) returns (RetInfo) {}
+    rpc DeleteTag(DeleteIds) returns (RetInfo) {}
+}
+
+service UserService {
+    rpc ListUser(QueryRequest) returns (QueryUserResp) {}
+    rpc CreateUser(BotUser) returns (RetInfo) {}
+    rpc UpdateUser(BotUser) returns (RetInfo) {}
+    rpc DeleteUser(DeleteIds) returns (RetInfo) {}
 }
 
 message DataItem {
     int64 tid = 1;
     int32 type = 2;
-    int32 number = 3;
+    uint32 number = 3;
     string code = 4;
     string name = 5;
     string desc = 6;
-    string category = 7;
-    string lang = 8;
-    repeated string tags = 9;
+    int64 categoryId = 7;
+    string category = 8;
+    string language = 9;
+    repeated string tags = 10;
 }
 
-message ImportResponse {
+message Ad {
+    int64 id = 1;
+    string keyword = 2;
+    int32 global = 3;
+    bool isShowAd = 4;
+    string expire = 5;
+    int64 categoryId = 6;
+    string category = 7;
+    string language = 8;
+    string name = 9;
+    string code = 10;
+    int32 type = 11;
+    uint32 number = 12;
+    string desc = 13;
+}
+
+message Tag {
+    int64 id = 1;
+    string name = 2;
+    int32 weight = 3;
+}
+
+message BotUser {
+    int64 userId = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string username = 4;
+    string LanguageCode = 5;
+    bool IsBot  = 6;
+    bool IsPremium = 7;
+    string lang = 8;
+}
+
+message DataSearchRequest {
+    string q = 1;
+    string category = 2;
+    int32 type = 3;
+    string code = 4;
+    string lang = 5;
+    int64 page = 6;
+    int64 size = 7;
+    string order =8;
+}
+
+message AdFilter {
+    string q = 1;
+    int32 global = 2;
+    bool isShowAd = 3;
+    bool filterExpire = 4;
+    int32 type = 5;
+    uint32 number = 6;
+    int64 page = 7;
+    int64 size = 8;
+    string order =9;
+}
+
+message QueryDataResp {
+    RetInfo ret = 1;
+    repeated DataItem data = 2;
+    int64 total = 3;
+}
+
+message QueryAdResp {
+    RetInfo ret = 1;
+    repeated Ad data = 2;
+    int64 total = 3;
+}
+
+message QueryTagResp {
+    RetInfo ret = 1;
+    repeated Tag data = 2;
+    int64 total = 3;
+}
+
+message QueryUserResp {
+    RetInfo ret = 1;
+    repeated BotUser data = 2;
+    int64 total = 3;
+}
+
+message QueryRequest {
+    string q = 1;
+    int64 page = 2;
+    int64 size = 3;
+    string order =4;
+}
+
+message DeleteIds{
+    repeated int64 ids = 1;
+}
+message DeleteCodes{
+    repeated string codes = 1;
+}
+
+message RetInfo {
     bool status = 1;
     string msg = 2;
 }

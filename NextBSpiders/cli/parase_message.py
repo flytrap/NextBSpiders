@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders.libs.nextb_spier_db import NextBTGPOSTGRESDB
 from utils.parase import ParseInfo
 from NextBSpiders.bot_api.tg_grpc import TgBotServiceStub
-from NextBSpiders.bot_api.tg_pb2 import DataItem, ImportResponse
+from NextBSpiders.bot_api.tg_pb2 import DataItem
 
 group_map = {
     1147972019: "SE-索引秘书",
@@ -25,24 +25,29 @@ async def update_message_data(tp="message"):
     async with Channel(HOST, PORT) as channel:
         greeter = TgBotServiceStub(channel)
 
-        reply = await greeter.ImportData(
-            [
+        items = []
+        async for item in get_messages(tp):
+            items.append(
                 DataItem(
                     type=item.get("type", 0),
                     name=item["name"],
-                    category=item["category"],
+                    category=item["category"] if item.get("category") else "",
                     desc=item.get("desc", ""),
                     number=item.get("number", 0),
                     code=item["code"],
-                    lang=item.get("lang", "chinese").split()[-1].lower()
+                    language=item.get("lang", "chinese").split()[-1].lower()
                     if item.get("lang")
                     else "chinese",
                     tags=item.get("tags", []),
                 )
-                async for item in get_messages(tp)
-            ]
-        )
-        print(reply.message)
+            )
+            if len(items) >= 10000:
+                reply = await greeter.ImportData(items)
+                print(len(reply))
+                items = []
+        if items:
+            reply = await greeter.ImportData(items)
+            print(len(reply))
 
 
 async def get_messages(tp="message"):

@@ -16,7 +16,26 @@ from . import tg_pb2
 class TgBotServiceBase(abc.ABC):
     @abc.abstractmethod
     async def ImportData(
-        self, stream: "grpclib.server.Stream[tg_pb2.DataItem, tg_pb2.ImportResponse]"
+        self, stream: "grpclib.server.Stream[tg_pb2.DataItem, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def SearchData(
+        self,
+        stream: "grpclib.server.Stream[tg_pb2.DataSearchRequest, tg_pb2.QueryDataResp]",
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def UpdateData(
+        self, stream: "grpclib.server.Stream[tg_pb2.DataItem, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def DeleteData(
+        self, stream: "grpclib.server.Stream[tg_pb2.DeleteCodes, tg_pb2.RetInfo]"
     ) -> None:
         pass
 
@@ -26,7 +45,25 @@ class TgBotServiceBase(abc.ABC):
                 self.ImportData,
                 grpclib.const.Cardinality.STREAM_STREAM,
                 tg_pb2.DataItem,
-                tg_pb2.ImportResponse,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.TgBotService/SearchData": grpclib.const.Handler(
+                self.SearchData,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DataSearchRequest,
+                tg_pb2.QueryDataResp,
+            ),
+            "/tg.v1.TgBotService/UpdateData": grpclib.const.Handler(
+                self.UpdateData,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DataItem,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.TgBotService/DeleteData": grpclib.const.Handler(
+                self.DeleteData,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DeleteCodes,
+                tg_pb2.RetInfo,
             ),
         }
 
@@ -37,5 +74,351 @@ class TgBotServiceStub:
             channel,
             "/tg.v1.TgBotService/ImportData",
             tg_pb2.DataItem,
-            tg_pb2.ImportResponse,
+            tg_pb2.RetInfo,
+        )
+        self.SearchData = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TgBotService/SearchData",
+            tg_pb2.DataSearchRequest,
+            tg_pb2.QueryDataResp,
+        )
+        self.UpdateData = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TgBotService/UpdateData",
+            tg_pb2.DataItem,
+            tg_pb2.RetInfo,
+        )
+        self.DeleteData = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TgBotService/DeleteData",
+            tg_pb2.DeleteCodes,
+            tg_pb2.RetInfo,
+        )
+
+
+class AdServiceBase(abc.ABC):
+    @abc.abstractmethod
+    async def ListAd(
+        self, stream: "grpclib.server.Stream[tg_pb2.AdFilter, tg_pb2.QueryAdResp]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def CreateAd(
+        self, stream: "grpclib.server.Stream[tg_pb2.Ad, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def UpdateAd(
+        self, stream: "grpclib.server.Stream[tg_pb2.Ad, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def DeleteAd(
+        self, stream: "grpclib.server.Stream[tg_pb2.DeleteIds, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
+        return {
+            "/tg.v1.AdService/ListAd": grpclib.const.Handler(
+                self.ListAd,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.AdFilter,
+                tg_pb2.QueryAdResp,
+            ),
+            "/tg.v1.AdService/CreateAd": grpclib.const.Handler(
+                self.CreateAd,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.Ad,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.AdService/UpdateAd": grpclib.const.Handler(
+                self.UpdateAd,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.Ad,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.AdService/DeleteAd": grpclib.const.Handler(
+                self.DeleteAd,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DeleteIds,
+                tg_pb2.RetInfo,
+            ),
+        }
+
+
+class AdServiceStub:
+    def __init__(self, channel: grpclib.client.Channel) -> None:
+        self.ListAd = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.AdService/ListAd",
+            tg_pb2.AdFilter,
+            tg_pb2.QueryAdResp,
+        )
+        self.CreateAd = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.AdService/CreateAd",
+            tg_pb2.Ad,
+            tg_pb2.RetInfo,
+        )
+        self.UpdateAd = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.AdService/UpdateAd",
+            tg_pb2.Ad,
+            tg_pb2.RetInfo,
+        )
+        self.DeleteAd = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.AdService/DeleteAd",
+            tg_pb2.DeleteIds,
+            tg_pb2.RetInfo,
+        )
+
+
+class CategoryServiceBase(abc.ABC):
+    @abc.abstractmethod
+    async def ListCategory(
+        self, stream: "grpclib.server.Stream[tg_pb2.QueryRequest, tg_pb2.QueryTagResp]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def CreateCategory(
+        self, stream: "grpclib.server.Stream[tg_pb2.Tag, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def UpdateCategory(
+        self, stream: "grpclib.server.Stream[tg_pb2.Tag, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def DeleteCategory(
+        self, stream: "grpclib.server.Stream[tg_pb2.DeleteIds, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
+        return {
+            "/tg.v1.CategoryService/ListCategory": grpclib.const.Handler(
+                self.ListCategory,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.QueryRequest,
+                tg_pb2.QueryTagResp,
+            ),
+            "/tg.v1.CategoryService/CreateCategory": grpclib.const.Handler(
+                self.CreateCategory,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.Tag,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.CategoryService/UpdateCategory": grpclib.const.Handler(
+                self.UpdateCategory,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.Tag,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.CategoryService/DeleteCategory": grpclib.const.Handler(
+                self.DeleteCategory,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DeleteIds,
+                tg_pb2.RetInfo,
+            ),
+        }
+
+
+class CategoryServiceStub:
+    def __init__(self, channel: grpclib.client.Channel) -> None:
+        self.ListCategory = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.CategoryService/ListCategory",
+            tg_pb2.QueryRequest,
+            tg_pb2.QueryTagResp,
+        )
+        self.CreateCategory = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.CategoryService/CreateCategory",
+            tg_pb2.Tag,
+            tg_pb2.RetInfo,
+        )
+        self.UpdateCategory = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.CategoryService/UpdateCategory",
+            tg_pb2.Tag,
+            tg_pb2.RetInfo,
+        )
+        self.DeleteCategory = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.CategoryService/DeleteCategory",
+            tg_pb2.DeleteIds,
+            tg_pb2.RetInfo,
+        )
+
+
+class TagServiceBase(abc.ABC):
+    @abc.abstractmethod
+    async def ListTag(
+        self, stream: "grpclib.server.Stream[tg_pb2.QueryRequest, tg_pb2.QueryTagResp]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def GetOrCreateTag(
+        self, stream: "grpclib.server.Stream[tg_pb2.Tag, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def UpdateTag(
+        self, stream: "grpclib.server.Stream[tg_pb2.Tag, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def DeleteTag(
+        self, stream: "grpclib.server.Stream[tg_pb2.DeleteIds, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
+        return {
+            "/tg.v1.TagService/ListTag": grpclib.const.Handler(
+                self.ListTag,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.QueryRequest,
+                tg_pb2.QueryTagResp,
+            ),
+            "/tg.v1.TagService/GetOrCreateTag": grpclib.const.Handler(
+                self.GetOrCreateTag,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.Tag,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.TagService/UpdateTag": grpclib.const.Handler(
+                self.UpdateTag,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.Tag,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.TagService/DeleteTag": grpclib.const.Handler(
+                self.DeleteTag,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DeleteIds,
+                tg_pb2.RetInfo,
+            ),
+        }
+
+
+class TagServiceStub:
+    def __init__(self, channel: grpclib.client.Channel) -> None:
+        self.ListTag = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TagService/ListTag",
+            tg_pb2.QueryRequest,
+            tg_pb2.QueryTagResp,
+        )
+        self.GetOrCreateTag = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TagService/GetOrCreateTag",
+            tg_pb2.Tag,
+            tg_pb2.RetInfo,
+        )
+        self.UpdateTag = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TagService/UpdateTag",
+            tg_pb2.Tag,
+            tg_pb2.RetInfo,
+        )
+        self.DeleteTag = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.TagService/DeleteTag",
+            tg_pb2.DeleteIds,
+            tg_pb2.RetInfo,
+        )
+
+
+class UserServiceBase(abc.ABC):
+    @abc.abstractmethod
+    async def ListUser(
+        self, stream: "grpclib.server.Stream[tg_pb2.QueryRequest, tg_pb2.QueryUserResp]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def CreateUser(
+        self, stream: "grpclib.server.Stream[tg_pb2.BotUser, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def UpdateUser(
+        self, stream: "grpclib.server.Stream[tg_pb2.BotUser, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    @abc.abstractmethod
+    async def DeleteUser(
+        self, stream: "grpclib.server.Stream[tg_pb2.DeleteIds, tg_pb2.RetInfo]"
+    ) -> None:
+        pass
+
+    def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
+        return {
+            "/tg.v1.UserService/ListUser": grpclib.const.Handler(
+                self.ListUser,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.QueryRequest,
+                tg_pb2.QueryUserResp,
+            ),
+            "/tg.v1.UserService/CreateUser": grpclib.const.Handler(
+                self.CreateUser,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.BotUser,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.UserService/UpdateUser": grpclib.const.Handler(
+                self.UpdateUser,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.BotUser,
+                tg_pb2.RetInfo,
+            ),
+            "/tg.v1.UserService/DeleteUser": grpclib.const.Handler(
+                self.DeleteUser,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                tg_pb2.DeleteIds,
+                tg_pb2.RetInfo,
+            ),
+        }
+
+
+class UserServiceStub:
+    def __init__(self, channel: grpclib.client.Channel) -> None:
+        self.ListUser = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.UserService/ListUser",
+            tg_pb2.QueryRequest,
+            tg_pb2.QueryUserResp,
+        )
+        self.CreateUser = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.UserService/CreateUser",
+            tg_pb2.BotUser,
+            tg_pb2.RetInfo,
+        )
+        self.UpdateUser = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.UserService/UpdateUser",
+            tg_pb2.BotUser,
+            tg_pb2.RetInfo,
+        )
+        self.DeleteUser = grpclib.client.UnaryUnaryMethod(
+            channel,
+            "/tg.v1.UserService/DeleteUser",
+            tg_pb2.DeleteIds,
+            tg_pb2.RetInfo,
         )

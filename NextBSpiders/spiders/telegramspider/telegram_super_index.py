@@ -68,8 +68,8 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             # 开始爬取
             chat = telegram_app.get_entity(self.chat_code)
 
-            # result = self.top_scan(telegram_app, chat)
-            result = self.lang_scan(telegram_app, chat)
+            result = self.top_scan(telegram_app, chat)
+            # result = self.lang_scan(telegram_app, chat)
             for item in result:
                 yield item
         except Exception as e:
@@ -107,22 +107,22 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
         ls = [1, 2]
         index = 1
         while index < len(ls):
-            telegram_app.client.send_message(chat, "/lang")
-            self.sleep()
-            lang = list(telegram_app.client.get_messages(chat))[0]
-            ls = [i for item in lang.buttons for i in item]
+            # telegram_app.client.send_message(chat, "/lang")
+            # self.sleep()
+            # lang = list(telegram_app.client.get_messages(chat))[0]
+            # ls = [i for item in lang.buttons for i in item]
 
-            bt = ls[index]
-            logger.info(f"select lang: {bt.text}")
-            self.sleep()
-            try:
-                bt.click()
-            except Exception as e:
-                logger.warning(e)
-                continue
+            # bt = ls[index]
+            # logger.info(f"select lang: {bt.text}")
+            # self.sleep()
+            # try:
+            #     bt.click()
+            # except Exception as e:
+            #     logger.warning(e)
+            #     continue
 
             for item in self.iter_category_data(telegram_app, chat):
-                item["lang"] = bt.text
+                item["lang"] = "简体中文"  # bt.text
                 yield item
             index += 1
 
@@ -150,6 +150,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             except Exception as e:
                 logger.warning(e)
                 continue
+            self.sleep()
             for item in self.get_massages(telegram_app, chat, bt.text):
                 yield item
             index += 1
