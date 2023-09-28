@@ -7,34 +7,39 @@
 # @Desc    :   None
 
 
-import os
-import time
 import datetime
 import logging
+import os
+import time
 from random import randint
+
 from loguru import logger
 from telethon import TelegramClient, sync
 from telethon.tl.functions.channels import (
     GetFullChannelRequest,
-    JoinChannelRequest,
     GetParticipantsRequest,
+    JoinChannelRequest,
+)
+from telethon.tl.functions.contacts import (
+    DeleteContactsRequest,
+    GetContactsRequest,
+    SearchRequest,
 )
 from telethon.tl.functions.messages import (
-    ImportChatInviteRequest,
     CheckChatInviteRequest,
     GetFullChatRequest,
+    ImportChatInviteRequest,
 )
-from telethon.tl.functions.contacts import DeleteContactsRequest, GetContactsRequest
+from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import (
-    ChatInviteAlready,
-    ChatInvite,
-    Message,
     Channel,
-    Chat,
     ChannelForbidden,
     ChannelParticipantsSearch,
+    Chat,
+    ChatInvite,
+    ChatInviteAlready,
+    Message,
 )
-
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("telethon").setLevel(level=logging.INFO)
@@ -69,6 +74,20 @@ class TelegramAPIs(object):
         """
         if self.client.is_connected():
             self.client.disconnect()
+
+    def get_info(self, code: str):
+        result = self.client(GetFullChatRequest(code))
+
+        chat = result.chats[0]
+        return {
+            "number": result.full_chat.participants_count,
+            "code": code,
+            "name": chat.title,
+            "id": result.full_chat.id,
+            "type": 1 if chat.megagroup else 2,
+            "active": len(result.users),
+            "desc": result.full_chat.about,
+        }
 
     # 加入频道或群组
     def join_conversation(self, invite):

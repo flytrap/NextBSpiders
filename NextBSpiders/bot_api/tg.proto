@@ -4,7 +4,7 @@ option go_package = "./v1;pb";
 package tg.v1;
 
 service TgBotService {
-    rpc ImportData(stream DataItem) returns (stream RetInfo){}  // 导入组数据
+    rpc ImportData(stream DataInfo) returns (stream RetInfo){}  // 导入组数据
     rpc SearchData(DataSearchRequest) returns (QueryDataResp){}
     rpc UpdateData(DataItem) returns (RetInfo) {}
     rpc DeleteData(DeleteCodes) returns (RetInfo) {}
@@ -45,26 +45,29 @@ message DataItem {
     string code = 4;
     string name = 5;
     string desc = 6;
-    int64 categoryId = 7;
-    string category = 8;
-    string language = 9;
-    repeated string tags = 10;
+    int64 category = 7;
+    string language = 8;
+}
+
+message DataInfo {
+    DataItem detail = 1;
+    string category = 2;
+    repeated string tags = 3;
 }
 
 message Ad {
     int64 id = 1;
     string keyword = 2;
     int32 global = 3;
-    bool isShowAd = 4;
+    string adTag = 4;
     string expire = 5;
-    int64 categoryId = 6;
-    string category = 7;
-    string language = 8;
-    string name = 9;
-    string code = 10;
-    int32 type = 11;
-    uint32 number = 12;
-    string desc = 13;
+    string category = 6;
+    string language = 7;
+    string name = 8;
+    string code = 9;
+    int32 type = 10;
+    uint32 number = 11;
+    string desc = 12;
 }
 
 message Tag {
@@ -98,7 +101,7 @@ message DataSearchRequest {
 message AdFilter {
     string q = 1;
     int32 global = 2;
-    bool isShowAd = 3;
+    string adTag = 3;
     bool filterExpire = 4;
     int32 type = 5;
     uint32 number = 6;
@@ -109,7 +112,7 @@ message AdFilter {
 
 message QueryDataResp {
     RetInfo ret = 1;
-    repeated DataItem data = 2;
+    repeated DataInfo data = 2;
     int64 total = 3;
 }
 

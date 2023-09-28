@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath("."))
 from NextBSpiders.libs.nextb_spier_db import NextBTGPOSTGRESDB
 from utils.parase import ParseInfo
 from NextBSpiders.bot_api.tg_grpc import TgBotServiceStub
-from NextBSpiders.bot_api.tg_pb2 import DataItem
+from NextBSpiders.bot_api.tg_pb2 import DataItem, DataInfo
 
 group_map = {
     1147972019: "SE-索引秘书",
@@ -28,16 +28,18 @@ async def update_message_data(tp="message"):
         items = []
         async for item in get_messages(tp):
             items.append(
-                DataItem(
-                    type=item.get("type", 0),
-                    name=item["name"],
+                DataInfo(
                     category=item["category"] if item.get("category") else "",
-                    desc=item.get("desc", ""),
-                    number=item.get("number", 0),
-                    code=item["code"],
-                    language=item.get("lang", "chinese").split()[-1].lower()
-                    if item.get("lang")
-                    else "chinese",
+                    detail=DataItem(
+                        type=item.get("type", 0),
+                        name=item["name"],
+                        desc=item.get("desc", ""),
+                        number=item.get("number", 0),
+                        code=item["code"],
+                        language=item.get("lang", "chinese").split()[-1].lower()
+                        if item.get("lang")
+                        else "chinese",
+                    ),
                     tags=item.get("tags", []),
                 )
             )

@@ -44,7 +44,7 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
             self.clash_proxy = (protocal, proxy_ip, proxy_port)
 
     def start_requests(self):
-        yield scrapy.Request(url="https://baidu.com", callback=self.parse_list)
+        yield scrapy.Request(url="https://qq.com", callback=self.parse_list)
 
     def parse_list(self, response):
         if not os.path.exists(self.session_name):
@@ -79,23 +79,16 @@ class TelegramSuperIndex(scrapy.Spider, ABC):
 
     def top_scan(self, telegram_app, chat):
         """通过关键词排行获取数据"""
-        telegram_app.client.send_message(chat, "/group")
-        msg = list(telegram_app.client.get_messages(chat))[-1]
-        if not msg.buttons:
-            msg = list(telegram_app.client.get_messages(chat))[-1]
-        ls = [i for item in msg.buttons for i in item]
+        telegram_app.client.send_message(chat, "/hotkey")
+        msgs = list(telegram_app.client.get_messages(chat))
+        bts = None
+        while not bts:
+            for msg in msgs:
+                if msg.buttons:
+                    bts = msg.buttons
+            msgs = list(telegram_app.client.get_messages(chat))
 
-        ls[-2].click()  # 关键词排名广告
-        msg = list(telegram_app.client.get_messages(chat))[-1]
-        ls = [i for item in msg.buttons for i in item]
-        ls[1].click()  # 关键词排名广告
-
-        msg = list(telegram_app.client.get_messages(chat))[-1]
-        ls = [i for item in msg.buttons for i in item]
-        ls[1].click()  # 热门关键词
-
-        msg = list(telegram_app.client.get_messages(chat))[-1]
-        ls = [i.text.split("(")[0] for item in msg.buttons for i in item]  # 所有关键词
+        ls = [i.text.split("(")[0] for item in bts for i in item]  # 所有关键词
         for keyword in ls:
             logger.info(keyword)
             telegram_app.client.send_message(chat, keyword)

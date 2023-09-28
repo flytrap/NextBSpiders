@@ -49,21 +49,25 @@ class ParseInfo(object):
             if not cls.check_group(item):
                 continue
             result = {}
-            name = re.findall("\[(.*)\]", item)[0].replace("/", "")
-            result["name"] = (
-                "-".join(name.split("-")[:-1]).strip() if "-" in name else name
-            )
-            result["code"] = re.findall("\((.*)\)", item)[0].split("/")[-1]
-            result["tags"] = list(
-                set(
-                    [
-                        item.strip()
-                        for item in jieba.cut(result["name"])
-                        if item.strip() and cls.check_tag(item.strip())
-                    ]
+            try:
+                name = re.findall("\[(.*)\]", item)[0].replace("/", "")
+                result["name"] = (
+                    "-".join(name.split("-")[:-1]).strip() if "-" in name else name
                 )
-            )
-            result["type"] = 2 if "📢" in item else 1
+                result["code"] = re.findall("\((.*)\)", item)[0].split("/")[-1]
+                result["tags"] = list(
+                    set(
+                        [
+                            item.strip()
+                            for item in jieba.cut(result["name"])
+                            if item.strip() and cls.check_tag(item.strip())
+                        ]
+                    )
+                )
+                result["type"] = 2 if "📢" in item else 1
+            except Exception as e:
+                logger.exception(e)
+                continue
             try:
                 result["number"] = cls.parse_number(name)
             except Exception as e:

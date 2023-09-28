@@ -16,7 +16,7 @@ from . import tg_pb2
 class TgBotServiceBase(abc.ABC):
     @abc.abstractmethod
     async def ImportData(
-        self, stream: "grpclib.server.Stream[tg_pb2.DataItem, tg_pb2.RetInfo]"
+        self, stream: "grpclib.server.Stream[tg_pb2.DataInfo, tg_pb2.RetInfo]"
     ) -> None:
         pass
 
@@ -44,7 +44,7 @@ class TgBotServiceBase(abc.ABC):
             "/tg.v1.TgBotService/ImportData": grpclib.const.Handler(
                 self.ImportData,
                 grpclib.const.Cardinality.STREAM_STREAM,
-                tg_pb2.DataItem,
+                tg_pb2.DataInfo,
                 tg_pb2.RetInfo,
             ),
             "/tg.v1.TgBotService/SearchData": grpclib.const.Handler(
@@ -73,7 +73,7 @@ class TgBotServiceStub:
         self.ImportData = grpclib.client.StreamStreamMethod(
             channel,
             "/tg.v1.TgBotService/ImportData",
-            tg_pb2.DataItem,
+            tg_pb2.DataInfo,
             tg_pb2.RetInfo,
         )
         self.SearchData = grpclib.client.UnaryUnaryMethod(

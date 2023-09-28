@@ -46,3 +46,18 @@ class TelegramGroupInfo(Base):
     number = Column(Integer())
     desc = Column(Text())
     tags = Column(String(5096))  # 逗号分割
+
+
+class TelegramGroupExtend(Base):
+    __tablename__ = "telegram_group_extend"
+
+    # postgresql
+    id = Column(BIGINT(), primary_key=True, unique=True, autoincrement=True)
+
+    name = Column(String(255))
+    code = Column(String(255))  # 群代号
+    lang = Column(String(255))  # 语言
+    type = Column(Integer())  # 区分群组还是channel
+    number = Column(Integer())
+    active = Column(Integer())  # 活跃人数
+    desc = Column(Text())
