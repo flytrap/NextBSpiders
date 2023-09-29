@@ -66,6 +66,8 @@ class TelegramGroupUpdate(scrapy.Spider, ABC):
             for code in codes:
                 logger.info(f"get chat: {code}")
                 chat = telegram_app.get_info(code.strip().strip('"'))
+                if not chat:
+                    break
                 yield chat
                 self.sleep()
         except Exception as e:

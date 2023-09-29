@@ -10,6 +10,7 @@
 import datetime
 import logging
 import os
+import re
 import time
 from random import randint
 
@@ -91,6 +92,14 @@ class TelegramAPIs(object):
             }
         except Exception as e:
             logger.info(e)
+            es = str(e)
+            if "A wait of" in es and "seconds is required" in es:
+                s = re.findall("\d+", es)
+                if s:
+                    logger.info(f"检测到防控， 休息{s[0]}s")
+                    time.sleep(int(s[0]) + 30)
+                    return self.get_info(code)
+                return
         return {"code": code}
 
     # 加入频道或群组
