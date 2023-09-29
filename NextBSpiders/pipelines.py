@@ -13,7 +13,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import exists
 
 from NextBSpiders.configs.postgreconfig import db_config
-from NextBSpiders.items import TelegramGroupInfo, TelegramMessage
+from NextBSpiders.items import TelegramGroupExtend, TelegramGroupInfo, TelegramMessage
 
 """
 后续需要将所有的输出结果统一到一个pipeline里，根据爬虫选择输出方式
@@ -31,6 +31,11 @@ class AppspiderPostgreslPipeline(object):
         self.session_maker = None
         self.datas = []
         self.push_number = 50
+        self._store_db_map = {
+            "telegram.url.tw": self.save_group_info,
+            "telegramSuperIndex": self.save_group_info,
+            "telegramGroupUpdate": self.save_group_extend,
+        }
 
     def open_spider(self, spider: scrapy.Spider):
         engine = create_engine(self.conn_str)
@@ -41,8 +46,9 @@ class AppspiderPostgreslPipeline(object):
 
     def process_item(self, item, spider: scrapy.Spider):
         if len(self.datas) >= self.push_number:
-            if spider.name in GROUP_SPIDER_LIST:
-                self.save_group_info()
+            func = self._store_db_map.get(spider.name)
+            if func:
+                func()
             else:
                 self.save_datas()
         else:
@@ -52,8 +58,9 @@ class AppspiderPostgreslPipeline(object):
 
     def close_spider(self, spider: scrapy.Spider):
         if len(self.datas) > 0:
-            if spider.name in GROUP_SPIDER_LIST:
-                self.save_group_info()
+            func = self._store_db_map.get(spider.name)
+            if func:
+                func()
             else:
                 self.save_datas()
         self.session_maker.close_all()
@@ -91,9 +98,6 @@ class AppspiderPostgreslPipeline(object):
             code = data.get("code", "")
             if not code:
                 continue
-            # is_exist = self.session_maker.query(
-            #     exists().where(TelegramGroupInfo.code == code)
-            # ).scalar()
             m: TelegramGroupInfo = (
                 self.session_maker.query(TelegramGroupInfo)
                 .filter(TelegramGroupInfo.code == code)
@@ -118,6 +122,39 @@ class AppspiderPostgreslPipeline(object):
             new_message.desc = data.get("desc", "")
             new_message.tags = ",".join(data.get("tags", []))
             self.session_maker.add(new_message)
+        self.session_maker.commit()
+        self.datas = []
+
+    def save_group_extend(self):
+        for data in self.datas:
+            code = data.get("code", "")
+            if not code:
+                continue
+            m: TelegramGroupExtend = (
+                self.session_maker.query(TelegramGroupExtend)
+                .filter(TelegramGroupExtend.code == code)
+                .first()
+            )
+            if m:
+                if not m.desc and data.get("desc", ""):
+                    m.desc = data["desc"]
+                if not m.number and data.get("number", 0):
+                    m.number = data["number"]
+                if not m.active and data.get("active", 0):
+                    m.number = data["number"]
+                m.save()
+                continue
+            new_message = TelegramGroupExtend()
+            new_message.code = code
+            new_message.name = data.get("name", "")
+            new_message.lang = data.get("lang", "")
+            new_message.type = data.get("type", 1)
+            new_message.active = data.get("active", 0)
+            new_message.number = data.get("number", 0)
+            new_message.desc = data.get("desc", "")
+            new_message.is_delete = len(data) == 0
+            self.session_maker.add(new_message)
+
         self.session_maker.commit()
         self.datas = []
 

@@ -5,22 +5,21 @@
 # Created time: 2023/09/22
 import base64
 import json
-import os
 import random
 import time
 from abc import ABC
+from typing import List
 
 import scrapy
 from loguru import logger
 
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
-from utils.parase import ParseInfo
 
 IGNORE_CATEGORIES = ["↩️ 返回"]
 
 
-class TelegramGroupInfo(scrapy.Spider, ABC):
-    name = "telegramGroupInfo"  # 获取群组信息
+class TelegramGroupUpdate(scrapy.Spider, ABC):
+    name = "telegramGroupUpdate"  # 获取群组信息
 
     # 降低效率，单线程，每个请求延迟4秒
     custom_settings = {"CONCURRENT_REQUESTS": 4, "DOWNLOAD_DELAY": 1}
@@ -42,10 +41,12 @@ class TelegramGroupInfo(scrapy.Spider, ABC):
             self.clash_proxy = (protocal, proxy_ip, proxy_port)
 
     def start_requests(self):
-        for item in self.scan_messages():
+        with open("codes.txt") as f:
+            codes = f.readlines()
+        for item in self.scan_messages(codes):
             yield item
 
-    def scan_messages(self):
+    def scan_messages(self, codes: List[str]):
         telegram_app = TelegramAPIs()
         try:
             telegram_app.init_client(
@@ -59,11 +60,11 @@ class TelegramGroupInfo(scrapy.Spider, ABC):
             return
         try:
             # 开始爬取
-            chat = telegram_app.get_info("@daomaker")
-
-            result = self.top_scan(telegram_app, chat)
-            # result = self.lang_scan(telegram_app, chat)
-            yield result
+            for code in codes:
+                logger.info(f"get chat: {code}")
+                chat = telegram_app.get_info(code.strip())
+                yield chat
+                self.sleep()
         except Exception as e:
             logger.exception(e)
         finally:

@@ -5,7 +5,7 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
-from sqlalchemy import Column, String, Text
+from sqlalchemy import Column, String, Text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import DateTime, BIGINT, Integer
 
@@ -61,3 +61,4 @@ class TelegramGroupExtend(Base):
     number = Column(Integer())
     active = Column(Integer())  # 活跃人数
     desc = Column(Text())
+    is_delete = Column(Boolean())

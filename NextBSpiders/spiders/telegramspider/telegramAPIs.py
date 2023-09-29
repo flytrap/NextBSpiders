@@ -76,18 +76,22 @@ class TelegramAPIs(object):
             self.client.disconnect()
 
     def get_info(self, code: str):
-        result = self.client(GetFullChatRequest(code))
+        try:
+            result = self.client(GetFullChannelRequest(code))
 
-        chat = result.chats[0]
-        return {
-            "number": result.full_chat.participants_count,
-            "code": code,
-            "name": chat.title,
-            "id": result.full_chat.id,
-            "type": 1 if chat.megagroup else 2,
-            "active": len(result.users),
-            "desc": result.full_chat.about,
-        }
+            chat = result.chats[0]
+            return {
+                "number": result.full_chat.participants_count,
+                "code": code,
+                "name": chat.title,
+                "id": result.full_chat.id,
+                "type": 1 if chat.megagroup else 2,
+                "active": len(result.users),
+                "desc": result.full_chat.about,
+            }
+        except Exception as e:
+            logger.info(e)
+        return {"code": code}
 
     # 加入频道或群组
     def join_conversation(self, invite):
