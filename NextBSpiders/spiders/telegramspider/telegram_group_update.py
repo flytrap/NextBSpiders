@@ -41,6 +41,9 @@ class TelegramGroupUpdate(scrapy.Spider, ABC):
             self.clash_proxy = (protocal, proxy_ip, proxy_port)
 
     def start_requests(self):
+        yield scrapy.Request(url="https://qq.com", callback=self.parse_code)
+
+    def parse_code(self, response):
         with open("codes.txt") as f:
             codes = f.readlines()
         for item in self.scan_messages(codes):
