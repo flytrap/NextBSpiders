@@ -62,7 +62,7 @@ class TelegramGroupUpdate(scrapy.Spider, ABC):
             # 开始爬取
             for code in codes:
                 logger.info(f"get chat: {code}")
-                chat = telegram_app.get_info(code.strip())
+                chat = telegram_app.get_info(code.strip().strip('"'))
                 yield chat
                 self.sleep()
         except Exception as e:
