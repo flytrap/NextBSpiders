@@ -19,7 +19,6 @@ tmp/
 
 # Distribution / packaging
 .Python
-.vscode/
 build/
 develop-eggs/
 dist/

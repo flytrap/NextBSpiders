@@ -1,0 +1,44 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "run spider",
+            "type": "python",
+            "request": "launch",
+            "program": "NextBSpiders/cli/run_spider.py",
+            "args": ["-c", "config.json", "-n", "telegramGroupUpdate"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "get dialog",
+            "type": "python",
+            "request": "launch",
+            "program": "NextBSpiders/cli/telegram_get_dialog.py",
+            "args": ["-c", "config.json"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "get msg",
+            "type": "python",
+            "request": "launch",
+            "program": "NextBSpiders/cli/telegram_get_message.py",
+            "args": ["-c", "config.json"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "send message",
+            "type": "python",
+            "request": "launch",
+            "program": "NextBSpiders/cli/send_msg.py",
+            "args": ["-c", "config.json", "-g", "indexsearche"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

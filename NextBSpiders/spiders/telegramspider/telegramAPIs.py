@@ -15,23 +15,18 @@ import time
 from random import randint
 
 from loguru import logger
-from telethon import TelegramClient, sync
+from telethon import TelegramClient
 from telethon.tl.functions.channels import (
     GetFullChannelRequest,
     GetParticipantsRequest,
     JoinChannelRequest,
 )
-from telethon.tl.functions.contacts import (
-    DeleteContactsRequest,
-    GetContactsRequest,
-    SearchRequest,
-)
+from telethon.tl.functions.contacts import DeleteContactsRequest, GetContactsRequest
 from telethon.tl.functions.messages import (
     CheckChatInviteRequest,
     GetFullChatRequest,
     ImportChatInviteRequest,
 )
-from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import (
     Channel,
     ChannelForbidden,
@@ -55,7 +50,7 @@ class TelegramAPIs(object):
     def __init__(self):
         self.client = None
 
-    def init_client(self, session_name, api_id, api_hash, proxy=None):
+    def init_client(self, session_name, api_id, api_hash, proxy=None, start=True):
         """
         初始化client
         :param session_name: session文件名
@@ -67,7 +62,8 @@ class TelegramAPIs(object):
             self.client = TelegramClient(session_name, api_id, api_hash)
         else:
             self.client = TelegramClient(session_name, api_id, api_hash, proxy=proxy)
-        self.client.start()
+        if start:
+            self.client.start()
 
     def close_client(self):
         """
@@ -101,6 +97,37 @@ class TelegramAPIs(object):
                     return self.get_info(code)
                 return
         return {"code": code}
+
+    def get_chat_user(self, code: str):
+        result = await self.client(GetFullChannelRequest(code))
+
+        chat = result.chats[0]
+        offset = 0
+        limit = 100
+        while True:
+            try:
+                participants = await self.client(
+                    GetParticipantsRequest(
+                        chat,
+                        filter=ChannelParticipantsSearch(""),
+                        offset=offset,
+                        limit=limit,
+                        hash=0,
+                    )
+                )
+                if not participants.users:
+                    break
+                for user in participants.users:
+                    yield user
+                offset += len(participants.users)
+            except Exception as e:
+                logger.info(e)
+
+    def send_msg(self, user, msg: str):
+        try:
+            return await self.client.send_message(user, msg)
+        except Exception as e:
+            logger.exception(e)
 
     # 加入频道或群组
     def join_conversation(self, invite):
