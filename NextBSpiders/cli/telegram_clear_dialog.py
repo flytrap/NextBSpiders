@@ -11,8 +11,10 @@ __doc__ = """
 清理telegram的消息框
 """
 
-import json
 import argparse
+import asyncio
+import json
+
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
@@ -50,7 +52,7 @@ def parse_cmd():
     return args
 
 
-def telegram_clear_dialog(config_file, all):
+async def telegram_clear_dialog(config_file, all):
     # 加载配置文件
     with open(config_file, "r") as f:
         data = f.read()
@@ -80,4 +82,5 @@ def run():
     CLI命令行入口
     """
     args = parse_cmd()
-    telegram_clear_dialog(args.config, args.all)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(telegram_clear_dialog(args.config, args.all))

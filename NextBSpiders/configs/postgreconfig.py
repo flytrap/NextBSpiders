@@ -7,7 +7,7 @@
 # @WeChat   : NextB
 
 db_config = {
-    "address": "192.168.0.102",
+    "address": "192.168.3.13",
     # "address": "localhost",
     "port": 5432,
     "username": "postgres",

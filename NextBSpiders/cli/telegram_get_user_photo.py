@@ -11,10 +11,12 @@ __doc__ = """
 获取telegram用户的头像
 """
 
-import json
 import argparse
+import asyncio
+import json
 
 from loguru import logger
+
 from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
@@ -87,7 +89,7 @@ def parse_cmd():
     return args
 
 
-def telegram_get_user_photo(args):
+async def telegram_get_user_photo(args):
     nick_names = []
     # 设置昵称
     if args.file:
@@ -135,4 +137,5 @@ def run():
     CLI命令行入口
     """
     args = parse_cmd()
-    telegram_get_user_photo(args)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(telegram_get_user_photo(args))

@@ -9,6 +9,15 @@
             "type": "python",
             "request": "launch",
             "program": "NextBSpiders/cli/run_spider.py",
+            "args": ["-c", "config.json", "-n", "telegramSuperIndex"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "run update",
+            "type": "python",
+            "request": "launch",
+            "program": "NextBSpiders/cli/run_spider.py",
             "args": ["-c", "config.json", "-n", "telegramGroupUpdate"],
             "console": "integratedTerminal",
             "justMyCode": false
@@ -36,7 +45,7 @@
             "type": "python",
             "request": "launch",
             "program": "NextBSpiders/cli/send_msg.py",
-            "args": ["-c", "config.json", "-g", "indexsearche"],
+            "args": ["-c", "config.json", "-g", "anwang666"],
             "console": "integratedTerminal",
             "justMyCode": false
         }

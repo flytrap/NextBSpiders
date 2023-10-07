@@ -12,10 +12,12 @@ from typing import List
 
 import scrapy
 from loguru import logger
+from redis import Redis
 
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
 IGNORE_CATEGORIES = ["↩️ 返回"]
+client = Redis("192.168.3.13", db=1)
 
 
 class TelegramGroupUpdate(scrapy.Spider, ABC):
@@ -64,8 +66,11 @@ class TelegramGroupUpdate(scrapy.Spider, ABC):
         try:
             # 开始爬取
             for code in codes:
+                if client.sismember("update:group", code):
+                    continue
                 logger.info(f"get chat: {code}")
                 chat = telegram_app.get_info(code.strip().strip('"'))
+                client.sadd("update:group", code)
                 if not chat:
                     break
                 yield chat
@@ -76,6 +81,6 @@ class TelegramGroupUpdate(scrapy.Spider, ABC):
             telegram_app.close_client()
 
     def sleep(self):
-        i = random.random() + random.randint(1, 10)
+        i = random.random() + random.randint(5, 60)
         logger.info(f"sleep: {i}")
         time.sleep(i)

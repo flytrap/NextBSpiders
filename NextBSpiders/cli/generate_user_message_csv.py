@@ -189,7 +189,9 @@ def geneerate_user_message(args):
         f.write("\n".join(r_datas))
         f.flush()
     logger.info("csv文件生成完成，文件保存为：{}...".format(csv_file))
-    logger.info("过滤条数设定为{}时共计筛选{}个用户跨越{}天的聊天数量...".format(cut_off, len(r_datas), dlt_days))
+    logger.info(
+        "过滤条数设定为{}时共计筛选{}个用户跨越{}天的聊天数量...".format(cut_off, len(r_datas), dlt_days)
+    )
 
 
 def run():

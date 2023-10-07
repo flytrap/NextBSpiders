@@ -12,6 +12,7 @@ __doc__ = """
 """
 
 import argparse
+import asyncio
 import datetime
 import json
 import os
@@ -48,7 +49,7 @@ def parse_cmd():
     return args
 
 
-def telegram_get_message(config_file):
+async def telegram_get_message(config_file):
     # 加载配置文件
     with open(config_file, "r") as f:
         data = f.read()
@@ -113,7 +114,8 @@ def run():
     CLI命令行入口
     """
     args = parse_cmd()
-    telegram_get_message(args.config)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(telegram_get_message(args.config))
 
 
 if __name__ == "__main__":

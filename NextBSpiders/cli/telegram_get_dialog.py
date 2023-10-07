@@ -11,6 +11,7 @@ __doc__ = """
 获取telegram的消息框
 """
 import argparse
+import asyncio
 import json
 import os
 import sys
@@ -46,7 +47,7 @@ def parse_cmd():
     return args
 
 
-def telegram_get_dialog(config_file):
+async def telegram_get_dialog(config_file):
     # 加载配置文件
     with open(config_file, "r") as f:
         data = f.read()
@@ -114,7 +115,8 @@ def run():
     CLI命令行入口
     """
     args = parse_cmd()
-    telegram_get_dialog(args.config)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(telegram_get_dialog(args.config))
 
 
 if __name__ == "__main__":

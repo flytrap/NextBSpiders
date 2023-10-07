@@ -8,6 +8,7 @@ import sys
 import time
 
 from loguru import logger
+from redis import Redis
 
 sys.path.insert(0, os.path.abspath("."))
 
@@ -15,7 +16,9 @@ from NextBSpiders import NEXTBSPIDER_VERSION
 from NextBSpiders.libs.nextb_spier_db import NextBTGPOSTGRESDB
 from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
-MSG = "我刚刚创建了一个群组搜索机器人，叫做@gsearcher，欢迎大家来试用，并提供意见和反馈！"
+MSG = "[hi, 您好, 新建了一个群组搜索机器人, 帮助您更快的找到您需要的群组:快搜，欢迎试用！](http://t.me/gsearcher)"
+
+client = Redis("192.168.3.13", db=1)
 
 
 def parse_cmd():
@@ -42,7 +45,7 @@ def parse_cmd():
     return args
 
 
-async def main(config_file: str, gid: str):
+def main(config_file: str, gid: str):
     with open(config_file, "r") as f:
         data = f.read()
     config_js = json.loads(data)
@@ -61,18 +64,31 @@ async def main(config_file: str, gid: str):
             api_hash=config_js["api_hash"],
             session_name=config_js["session_name"],
             proxy=clash_proxy,
-            start=False,
         )
-        telegram_app.client.start()
     except Exception as e:
         logger.exception(e)
     for user in telegram_app.get_chat_user(gid):
-        telegram_app.send_msg(user, MSG)
+        if user.is_self:
+            continue
+        if user.bot:
+            continue
+        if user.deleted:
+            continue
+        if client.sismember("msg:sended", user.id):
+            continue
+        try:
+            logger.info(f"send msg: {user.username}")
+            telegram_app.send_msg(user, MSG)
+            client.sadd("msg:sended", user.id)
+        except Exception as e:
+            logger.warning(e)
+            time.sleep(60 * 60)
         sleep()
+    telegram_app.close_client()
 
 
 def sleep():
-    i = random.random() + random.randint(3, 60)
+    i = random.random() + random.randint(30, 300)
     logger.info(f"sleep: {i}")
     time.sleep(i)
 
@@ -83,7 +99,7 @@ def run():
     """
     args = parse_cmd()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(args.config, args.gid))
+    main(args.config, args.gid)
 
 
 if __name__ == "__main__":

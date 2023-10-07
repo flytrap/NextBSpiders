@@ -15,7 +15,7 @@ import time
 from random import randint
 
 from loguru import logger
-from telethon import TelegramClient
+from telethon.sync import TelegramClient
 from telethon.tl.functions.channels import (
     GetFullChannelRequest,
     GetParticipantsRequest,
@@ -99,14 +99,14 @@ class TelegramAPIs(object):
         return {"code": code}
 
     def get_chat_user(self, code: str):
-        result = await self.client(GetFullChannelRequest(code))
+        result = self.client(GetFullChannelRequest(code))
 
         chat = result.chats[0]
         offset = 0
         limit = 100
         while True:
             try:
-                participants = await self.client(
+                participants = self.client(
                     GetParticipantsRequest(
                         chat,
                         filter=ChannelParticipantsSearch(""),
@@ -125,7 +125,7 @@ class TelegramAPIs(object):
 
     def send_msg(self, user, msg: str):
         try:
-            return await self.client.send_message(user, msg)
+            return self.client.send_message(user, msg)
         except Exception as e:
             logger.exception(e)
 
@@ -240,19 +240,14 @@ class TelegramAPIs(object):
         chat = self.client.get_entity(code)
         return chat
 
-    def message_chat(self, chat: Chat):
-        self.client.send_message(chat, "/start")
-        for item in self.client.get_messages(chat):
-            if item.buttons:
-                logger.info(item)
-
     def get_dialog_list(self):
         """
         获取已经加入的频道/群组列表
         :return: 返回json, {'data': [], 'result': 'success/failed', 'reason':''}
         data: list类型，
         """
-        for dialog in self.client.get_dialogs():
+        ds = self.client.get_dialogs()
+        for dialog in ds:
             # 确保每次数据的准确性
             result_json = {"result": "success", "reason": "ok"}
             out = {}
