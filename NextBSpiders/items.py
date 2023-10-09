@@ -62,3 +62,20 @@ class TelegramGroupExtend(Base):
     active = Column(Integer())  # 活跃人数
     desc = Column(Text())
     is_delete = Column(Boolean())
+
+
+class FenHongBao(Base):
+    __tablename__ = "fl_fhb"
+
+    # postgresql
+    id = Column(BIGINT(), primary_key=True, unique=True, autoincrement=True)
+
+    uuid = Column(String(255))
+    name = Column(String(255))
+    category = Column(String(255))
+    city = Column(String(255))  # 城市分级
+    time = Column(String(255))  # 发布时间
+    contact = Column(Integer())  # 联系方式
+    desc = Column(Text())
+    other = Column(Text())
+    imgs = Column(Text())  # 图片json

@@ -23,6 +23,15 @@
             "justMyCode": false
         },
         {
+            "name": "run fhb",
+            "type": "python",
+            "request": "launch",
+            "program": "NextBSpiders/cli/run_spider.py",
+            "args": ["-c", "config.json", "-n", "fl.fhb"],
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "get dialog",
             "type": "python",
             "request": "launch",

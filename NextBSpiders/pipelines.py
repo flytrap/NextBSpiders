@@ -13,7 +13,12 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import exists
 
 from NextBSpiders.configs.postgreconfig import db_config
-from NextBSpiders.items import TelegramGroupExtend, TelegramGroupInfo, TelegramMessage
+from NextBSpiders.items import (
+    TelegramGroupExtend,
+    TelegramGroupInfo,
+    TelegramMessage,
+    FenHongBao,
+)
 
 """
 后续需要将所有的输出结果统一到一个pipeline里，根据爬虫选择输出方式
@@ -35,6 +40,7 @@ class AppspiderPostgreslPipeline(object):
             "telegram.url.tw": self.save_group_info,
             "telegramSuperIndex": self.save_group_info,
             "telegramGroupUpdate": self.save_group_extend,
+            "fl.fhb": self.save_fhb,
         }
 
     def open_spider(self, spider: scrapy.Spider):
@@ -155,6 +161,39 @@ class AppspiderPostgreslPipeline(object):
             new_message.is_delete = len(data) == 0
             self.session_maker.add(new_message)
 
+        self.session_maker.commit()
+        self.datas = []
+
+    def save_fhb(self):
+        for data in self.datas:
+            uuid = data.get("uuid", "")
+            if not uuid:
+                continue
+            m: FenHongBao = (
+                self.session_maker.query(FenHongBao)
+                .filter(FenHongBao.uuid == uuid)
+                .first()
+            )
+            if m:
+                m.tags = ",".join(data.get("tags", []))
+                if ":" in m.category and data.get("category", ""):
+                    m.category = data["category"]
+                if not m.desc and data.get("desc", ""):
+                    m.desc = data["desc"]
+                if not m.number and data.get("number", 0):
+                    m.number = data["number"]
+                continue
+            new_message = FenHongBao()
+            new_message.uuid = uuid
+            new_message.name = data.get("name", "")
+            new_message.contact = data.get("contact", "")
+            new_message.category = data.get("category", "")
+            new_message.city = data.get("city", "")
+            new_message.time = data.get("time", 1)
+            new_message.other = data.get("other", 0)
+            new_message.desc = data.get("desc", "")
+            new_message.imgs = json.dumps(data.get("imgs", []))
+            self.session_maker.add(new_message)
         self.session_maker.commit()
         self.datas = []
 
