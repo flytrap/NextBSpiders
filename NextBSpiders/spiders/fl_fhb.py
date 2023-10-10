@@ -118,6 +118,6 @@ class FlFhbSpider(scrapy.Spider):
         self.sleep()
 
     def sleep(self):
-        i = random.random() + random.randint(1, 5)
+        i = random.random() + random.randint(0, 2)
         logger.info(f"sleep: {i}")
         time.sleep(i)
