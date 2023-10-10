@@ -2,11 +2,11 @@ import base64
 import json
 import random
 import time
-from abc import ABC
 
 import scrapy
 from bs4 import BeautifulSoup
 from loguru import logger
+from redis import Redis
 
 cookies = "_ga=GA1.1.1454877146.1696779290; connect.sid=s%3AC57qJhJ-KlST2qS36vSp_Z1uzCQzXDKb.CJw%2F48gT77yWugbADmvmnQBI060e6xgkFtS%2BSfdmZmI; _ga_N09TEJHT2X=GS1.1.1696859567.3.1.1696859668.0.0.0_ga=GA1.1.1454877146.1696779290; connect.sid=s%3AC57qJhJ-KlST2qS36vSp_Z1uzCQzXDKb.CJw%2F48gT77yWugbADmvmnQBI060e6xgkFtS%2BSfdmZmI; _ga_N09TEJHT2X=GS1.1.1696859567.3.1.1696859668.0.0.0_ga=GA1.1.1454877146.1696779290; connect.sid=s%3AC57qJhJ-KlST2qS36vSp_Z1uzCQzXDKb.CJw%2F48gT77yWugbADmvmnQBI060e6xgkFtS%2BSfdmZmI; _ga_N09TEJHT2X=GS1.1.1696859567.3.1.1696859668.0.0.0"
 COOKIES = {i[0].strip(): i[1].strip() for i in cookies.split(";")}
@@ -20,8 +20,10 @@ HEADERS = {
 }
 CATEGORIES = ["楼凤兼职", "高端外围", "黑店曝光", "丝足按摩", "洗浴桑拿", "酒店宾馆", "黑凤曝光", "校园霸凌"]
 
+client = Redis("192.168.3.13", db=1)
 
-class FlFhbSpider(scrapy.Spider, ABC):
+
+class FlFhbSpider(scrapy.Spider):
     name = "fl.fhb"  # 粉红豹
 
     # 降低效率，单线程，每个请求延迟4秒
@@ -55,12 +57,10 @@ class FlFhbSpider(scrapy.Spider, ABC):
             )
 
     def parse_detail(self, response):
-        print(response)
         url = response.request.url
         category = response.request.meta.get("category", "")
         soup = BeautifulSoup(response.body, features="lxml")
         if category and "/forum/" in url:
-            print(soup)
             yield {
                 "uuid": url.split("-")[-1],
                 "category": category,
@@ -81,6 +81,8 @@ class FlFhbSpider(scrapy.Spider, ABC):
             url = item.parent.attrs["href"]
             if url.startswith("/"):
                 url = f"https://52fenhongbao.com{url}"
+            if client.sismember("fl:fhb", url):
+                continue
             cs = item.find_all("span", class_="marked")
             if cs:
                 yield scrapy.Request(
@@ -93,9 +95,15 @@ class FlFhbSpider(scrapy.Spider, ABC):
         is_find = False
         for a in soup.find_all("a", class_="button"):
             if is_find:
-                url = item.attrs["href"]
-                if url.startswith("/"):
+                try:
+                    url = a.attrs["href"]
+                except Exception as e:
+                    logger.info(e)
+                    break
+                if not url.startswith("http"):
                     url = f"https://52fenhongbao.com/{url}"
+                if client.sismember("fl:fhb", url):
+                    break
                 yield scrapy.Request(
                     url=url,
                     callback=self.parse_detail,
@@ -106,8 +114,10 @@ class FlFhbSpider(scrapy.Spider, ABC):
                 break
             if "primary" in a.attrs["class"]:
                 is_find = True
+        client.sadd("fl:fhb", url)
+        self.sleep()
 
     def sleep(self):
-        i = random.random() + random.randint(5, 60)
+        i = random.random() + random.randint(1, 5)
         logger.info(f"sleep: {i}")
         time.sleep(i)

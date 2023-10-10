@@ -71,11 +71,11 @@ class FenHongBao(Base):
     id = Column(BIGINT(), primary_key=True, unique=True, autoincrement=True)
 
     uuid = Column(String(255))
-    name = Column(String(255))
-    category = Column(String(255))
-    city = Column(String(255))  # 城市分级
-    time = Column(String(255))  # 发布时间
-    contact = Column(Integer())  # 联系方式
+    name = Column(String(512))
+    category = Column(String(512))
+    city = Column(String(512))  # 城市分级
+    time = Column(String(256))  # 发布时间
+    contact = Column(String(512))  # 联系方式
     desc = Column(Text())
     other = Column(Text())
     imgs = Column(Text())  # 图片json

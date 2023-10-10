@@ -14,10 +14,10 @@ from sqlalchemy.sql import exists
 
 from NextBSpiders.configs.postgreconfig import db_config
 from NextBSpiders.items import (
+    FenHongBao,
     TelegramGroupExtend,
     TelegramGroupInfo,
     TelegramMessage,
-    FenHongBao,
 )
 
 """
@@ -169,22 +169,16 @@ class AppspiderPostgreslPipeline(object):
             uuid = data.get("uuid", "")
             if not uuid:
                 continue
-            m: FenHongBao = (
+            new_message: FenHongBao = (
                 self.session_maker.query(FenHongBao)
                 .filter(FenHongBao.uuid == uuid)
                 .first()
             )
-            if m:
-                m.tags = ",".join(data.get("tags", []))
-                if ":" in m.category and data.get("category", ""):
-                    m.category = data["category"]
-                if not m.desc and data.get("desc", ""):
-                    m.desc = data["desc"]
-                if not m.number and data.get("number", 0):
-                    m.number = data["number"]
-                continue
-            new_message = FenHongBao()
-            new_message.uuid = uuid
+            need_add = False
+            if not new_message:
+                new_message = FenHongBao()
+                new_message.uuid = uuid
+                need_add = True
             new_message.name = data.get("name", "")
             new_message.contact = data.get("contact", "")
             new_message.category = data.get("category", "")
@@ -193,7 +187,8 @@ class AppspiderPostgreslPipeline(object):
             new_message.other = data.get("other", 0)
             new_message.desc = data.get("desc", "")
             new_message.imgs = json.dumps(data.get("imgs", []))
-            self.session_maker.add(new_message)
+            if need_add:
+                self.session_maker.add(new_message)
         self.session_maker.commit()
         self.datas = []
 
