@@ -27,7 +27,7 @@ class FlFhbSpider(scrapy.Spider):
     name = "fl.fhb"  # 粉红豹
 
     # 降低效率，单线程，每个请求延迟4秒
-    custom_settings = {"CONCURRENT_REQUESTS": 4, "DOWNLOAD_DELAY": 1}
+    # custom_settings = {"CONCURRENT_REQUESTS": 4, "DOWNLOAD_DELAY": 1}
 
     def __init__(self, param, **kwargs):
         super().__init__(**kwargs)
@@ -46,10 +46,10 @@ class FlFhbSpider(scrapy.Spider):
             self.clash_proxy = f"{protocal}://{proxy_ip}:{proxy_port}"
 
     def start_requests(self):
-        for category in CATEGORIES:
+        for category in CATEGORIES[::-1]:
             yield scrapy.Request(
                 url=f"https://52fenhongbao.com/{category}",
-                # url="https://52fenhongbao.com/forum/%E7%8E%89%E7%A5%A5%E9%97%A8%E6%80%A7%E7%98%BE%E5%A4%A7%E7%9A%84m-774c621a6c3286fc11d406d6584922db",
+                # url="https://52fenhongbao.com/forum/%E8%A5%BF%E5%AE%89%E9%AB%98%E6%96%B0%E9%81%87%E8%A7%81%E2%80%9C%E5%88%9D%E6%81%8B%E2%80%9D%E7%9A%84%E5%AE%8C%E7%BE%8E%E4%BD%93%E9%AA%8C-7c7b46256ed588c5eac406b4f7e4fc0e",
                 callback=self.parse_detail,
                 headers=HEADERS,
                 # cookies=COOKIES,
@@ -61,12 +61,15 @@ class FlFhbSpider(scrapy.Spider):
         category = response.request.meta.get("category", "")
         soup = BeautifulSoup(response.body, features="lxml")
         if category and "/forum/" in url:
+            contact = soup.find_all("div", class_="mt1 mb1")[1].text
+            if len(contact) > 100 and contact.count("回复") > 3:
+                contact = ""
             yield {
                 "uuid": url.split("-")[-1],
                 "category": category,
                 "name": soup.find_all("h4", class_="mt1 light")[0].text,
                 "desc": soup.find_all("div", class_="mt1 mb1")[0].text,
-                "contact": soup.find_all("div", class_="mt1 mb1")[1].text,
+                "contact": contact,
                 "other": soup.find_all("tbody")[0].text,
                 "time": soup.find_all("div", class_="d justify middle gap mt2")[0]
                 .select("div.light")[0]
@@ -115,7 +118,7 @@ class FlFhbSpider(scrapy.Spider):
             if "primary" in a.attrs["class"]:
                 is_find = True
         client.sadd("fl:fhb", url)
-        self.sleep()
+        # self.sleep()
 
     def sleep(self):
         i = random.random()

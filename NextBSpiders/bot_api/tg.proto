@@ -47,6 +47,11 @@ message DataItem {
     string desc = 6;
     int64 category = 7;
     string language = 8;
+    string extend = 9;
+    string private = 10;
+    string location = 11;
+    int64 time = 12;
+    repeated string images = 13;
 }
 
 message DataInfo {

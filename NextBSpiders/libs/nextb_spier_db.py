@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, distinct
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from NextBSpiders.configs.postgreconfig import db_config
-from NextBSpiders.items import Base, TelegramMessage, TelegramGroupInfo
+from NextBSpiders.items import Base, TelegramMessage, TelegramGroupInfo, FenHongBao
 
 
 class NextBTGSQLITEDB:
@@ -107,7 +107,7 @@ class NextBTGSQLITEDB:
         for data in datas:
             yield data
 
-    def get_group_data(self, begin_offset_date=None, end_oofset_date=None):
+    def get_group_data(self):
         q = self.session_maker.query(
             TelegramGroupInfo.name,
             TelegramGroupInfo.code,
@@ -118,14 +118,13 @@ class NextBTGSQLITEDB:
             TelegramGroupInfo.desc,
             TelegramGroupInfo.tags,
         )
-        if begin_offset_date and end_oofset_date:
-            dataset = q.filter(
-                TelegramGroupInfo.postal_time >= begin_offset_date,
-                TelegramGroupInfo.postal_time < end_oofset_date,
-            ).all()
-        else:
-            dataset = q.all()
-        for data in dataset:
+        for data in q.all():
+            yield data
+
+    def get_fhb_data(self):
+        q = self.session_maker.query(FenHongBao)
+
+        for data in q.all():
             yield data
 
     def get_user_distinct_count(self):

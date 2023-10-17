@@ -186,6 +186,7 @@ class AppspiderPostgreslPipeline(object):
             new_message.time = data.get("time", 1)
             new_message.other = data.get("other", 0)
             new_message.desc = data.get("desc", "")
+            new_message.html = data.get("html", "")
             new_message.imgs = json.dumps(data.get("imgs", []))
             if need_add:
                 self.session_maker.add(new_message)

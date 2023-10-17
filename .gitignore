@@ -152,3 +152,5 @@ confi*.json
 nextb_binance_session.session
 nextb_binance_session.session-journal
 codes.txt
+NextBSpiders/bot_api/server.key
+NextBSpiders/bot_api/server.pem
