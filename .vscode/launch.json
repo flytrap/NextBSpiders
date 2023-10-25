@@ -54,7 +54,7 @@
             "type": "python",
             "request": "launch",
             "program": "NextBSpiders/cli/send_msg.py",
-            "args": ["-c", "config.json", "-g", "anwang666"],
+            "args": ["-c", "config.json", "-g", "sexinfochina"],
             "console": "integratedTerminal",
             "justMyCode": false
         }

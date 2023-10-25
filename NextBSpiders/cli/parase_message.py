@@ -19,8 +19,11 @@ from utils.parase import ParseInfo
 
 HOST = "127.0.0.1"
 PORT = 7011
+# HOST = "192.168.3.13"
+# HOST = "45.13.132.78"
+# PORT = 7015
 
-client = Redis("192.168.3.13", db=1)
+client = Redis("192.168.3.13", db=1, password="123456")
 redis_key = "grpc:fhb"
 
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -65,7 +68,7 @@ async def update_message_data(tp="message"):
                 )
             )
             client.sadd(redis_key, key)
-            if len(items) >= 1000:
+            if len(items) >= 10000:
                 reply = await greeter.ImportData(items)
                 print(len(reply))
                 items = []

@@ -13,16 +13,19 @@ import os
 import re
 import time
 from random import randint
+from typing import List
 
 from loguru import logger
 from telethon.sync import TelegramClient
 from telethon.tl.functions.channels import (
     GetFullChannelRequest,
     GetParticipantsRequest,
+    InviteToChannelRequest,
     JoinChannelRequest,
 )
 from telethon.tl.functions.contacts import DeleteContactsRequest, GetContactsRequest
 from telethon.tl.functions.messages import (
+    AddChatUserRequest,
     CheckChatInviteRequest,
     GetFullChatRequest,
     ImportChatInviteRequest,
@@ -128,6 +131,14 @@ class TelegramAPIs(object):
             return self.client.send_message(user, msg)
         except Exception as e:
             logger.exception(e)
+
+    def add_channel_users(self, channel: int, users: List[str]):
+        """添加用户到组货channel"""
+        try:
+            result = self.client(InviteToChannelRequest(channel=channel, users=users))
+            logger.info(result)
+        except Exception as e:
+            logger.info(e)
 
     # 加入频道或群组
     def join_conversation(self, invite):

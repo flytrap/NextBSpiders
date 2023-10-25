@@ -18,7 +18,7 @@ from NextBSpiders.spiders.telegramspider.telegramAPIs import TelegramAPIs
 
 MSG = "[hi, 您好, 新建了一个群组搜索机器人, 帮助您更快的找到您需要的群组:快搜，欢迎试用！](http://t.me/gsearcher)"
 
-client = Redis("192.168.3.13", db=1)
+client = Redis("192.168.3.13", db=1, password="123456")
 
 
 def parse_cmd():
@@ -50,6 +50,7 @@ def main(config_file: str, gid: str):
         data = f.read()
     config_js = json.loads(data)
     proxy = config_js.get("proxy")
+    channel = config_js.get("channel")
     # 如果配置代理
     clash_proxy = None
     if proxy:
@@ -78,7 +79,8 @@ def main(config_file: str, gid: str):
             continue
         try:
             logger.info(f"send msg: {user.username}")
-            telegram_app.send_msg(user, MSG)
+            # telegram_app.send_msg(user, MSG)
+            telegram_app.add_channel_users(channel, [user.username])
             client.sadd("msg:sended", user.id)
         except Exception as e:
             logger.warning(e)
@@ -98,7 +100,6 @@ def run():
     CLI命令行入口
     """
     args = parse_cmd()
-    loop = asyncio.get_event_loop()
     main(args.config, args.gid)
 
 
